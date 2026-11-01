@@ -1,0 +1,436 @@
+{
+  "testedAt": "2026-10-29T15:37:27.058Z",
+  "engine": "Stockfish 19 Lite WASM",
+  "durationMs": 9940,
+  "positions": [
+    {
+      "initialFen": "7k/6rq/5K2/8/4B3/8/7Q/R7 w - - 1 2",
+      "moves": []
+    },
+    {
+      "initialFen": "7k/8/4Q1K1/8/8/8/8/8 w - - 0 1",
+      "moves": []
+    },
+    {
+      "initialFen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "moves": [
+        "e2e4",
+        "e7e5",
+        "g1f3",
+        "b8c6"
+      ]
+    }
+  ],
+  "options": [
+    {
+      "name": "Threads",
+      "type": "spin",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "name": "Hash",
+      "type": "spin",
+      "min": 1,
+      "max": 33554432
+    },
+    {
+      "name": "Clear Hash",
+      "type": "button"
+    },
+    {
+      "name": "Ponder",
+      "type": "check"
+    },
+    {
+      "name": "MultiPV",
+      "type": "spin",
+      "min": 1,
+      "max": 256
+    },
+    {
+      "name": "Skill Level",
+      "type": "spin",
+      "min": 0,
+      "max": 20
+    },
+    {
+      "name": "Move Overhead",
+      "type": "spin",
+      "min": 0,
+      "max": 5000
+    },
+    {
+      "name": "nodestime",
+      "type": "spin",
+      "min": 0,
+      "max": 10000
+    },
+    {
+      "name": "UCI_Chess960",
+      "type": "check"
+    },
+    {
+      "name": "UCI_LimitStrength",
+      "type": "check"
+    },
+    {
+      "name": "UCI_Elo",
+      "type": "spin",
+      "min": 1320,
+      "max": 3190
+    },
+    {
+      "name": "UCI_ShowWDL",
+      "type": "check"
+    },
+    {
+      "name": "EvalFile",
+      "type": "string"
+    }
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "skill": 0,
+      "nodes": 256,
+      "moves": [
+        "e4h7",
+        "e6d6",
+        "d2d4"
+      ],
+      "depths": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "level": 2,
+      "skill": 1,
+      "nodes": 396,
+      "moves": [
+        "h2b8",
+        "e6c8",
+        "d2d4"
+      ],
+      "depths": [
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "level": 3,
+      "skill": 2,
+      "nodes": 613,
+      "moves": [
+        "h2h7",
+        "e6d6",
+        "b1c3"
+      ],
+      "depths": [
+        2,
+        3,
+        2
+      ]
+    },
+    {
+      "level": 4,
+      "skill": 3,
+      "nodes": 949,
+      "moves": [
+        "h2f4",
+        "e6d6",
+        "b1c3"
+      ],
+      "depths": [
+        2,
+        4,
+        2
+      ]
+    },
+    {
+      "level": 5,
+      "skill": 4,
+      "nodes": 1468,
+      "moves": [
+        "a1a2",
+        "e6d6",
+        "c2c4"
+      ],
+      "depths": [
+        3,
+        6,
+        2
+      ]
+    },
+    {
+      "level": 6,
+      "skill": 5,
+      "nodes": 2272,
+      "moves": [
+        "h2h7",
+        "e6d6",
+        "b1c3"
+      ],
+      "depths": [
+        3,
+        9,
+        3
+      ]
+    },
+    {
+      "level": 7,
+      "skill": 6,
+      "nodes": 3517,
+      "moves": [
+        "h2h7",
+        "e6d6",
+        "f1c4"
+      ],
+      "depths": [
+        5,
+        15,
+        4
+      ]
+    },
+    {
+      "level": 8,
+      "skill": 7,
+      "nodes": 5442,
+      "moves": [
+        "a1a8",
+        "e6e5",
+        "d2d4"
+      ],
+      "depths": [
+        9,
+        34,
+        5
+      ]
+    },
+    {
+      "level": 9,
+      "skill": 8,
+      "nodes": 8422,
+      "moves": [
+        "h2h7",
+        "e6e5",
+        "d2d4"
+      ],
+      "depths": [
+        10,
+        53,
+        6
+      ]
+    },
+    {
+      "level": 10,
+      "skill": 9,
+      "nodes": 13034,
+      "moves": [
+        "h2h7",
+        "e6e5",
+        "d2d4"
+      ],
+      "depths": [
+        12,
+        82,
+        7
+      ]
+    },
+    {
+      "level": 11,
+      "skill": 11,
+      "nodes": 20171,
+      "moves": [
+        "h2b8",
+        "e6e5",
+        "f1c4"
+      ],
+      "depths": [
+        14,
+        128,
+        8
+      ]
+    },
+    {
+      "level": 12,
+      "skill": 12,
+      "nodes": 31216,
+      "moves": [
+        "h2b8",
+        "e6e5",
+        "f1c4"
+      ],
+      "depths": [
+        15,
+        200,
+        8
+      ]
+    },
+    {
+      "level": 13,
+      "skill": 13,
+      "nodes": 48309,
+      "moves": [
+        "h2b8",
+        "e6e5",
+        "d2d4"
+      ],
+      "depths": [
+        24,
+        245,
+        11
+      ]
+    },
+    {
+      "level": 14,
+      "skill": 14,
+      "nodes": 74761,
+      "moves": [
+        "e4h7",
+        "e6e5",
+        "d2d4"
+      ],
+      "depths": [
+        28,
+        245,
+        11
+      ]
+    },
+    {
+      "level": 15,
+      "skill": 15,
+      "nodes": 115698,
+      "moves": [
+        "e4h7",
+        "e6c8",
+        "d2d4"
+      ],
+      "depths": [
+        32,
+        245,
+        12
+      ]
+    },
+    {
+      "level": 16,
+      "skill": 16,
+      "nodes": 179050,
+      "moves": [
+        "e4h7",
+        "e6c8",
+        "d2d4"
+      ],
+      "depths": [
+        36,
+        245,
+        12
+      ]
+    },
+    {
+      "level": 17,
+      "skill": 17,
+      "nodes": 277091,
+      "moves": [
+        "a1a8",
+        "e6c8",
+        "f1b5"
+      ],
+      "depths": [
+        40,
+        245,
+        13
+      ]
+    },
+    {
+      "level": 18,
+      "skill": 18,
+      "nodes": 428816,
+      "moves": [
+        "a1a8",
+        "e6c8",
+        "d2d4"
+      ],
+      "depths": [
+        45,
+        245,
+        15
+      ]
+    },
+    {
+      "level": 19,
+      "skill": 19,
+      "nodes": 663621,
+      "moves": [
+        "a1a8",
+        "e6c8",
+        "f1b5"
+      ],
+      "depths": [
+        52,
+        245,
+        15
+      ]
+    },
+    {
+      "level": 20,
+      "skill": 20,
+      "nodes": 1026997,
+      "moves": [
+        "a1a8",
+        "e6c8",
+        "d2d4"
+      ],
+      "depths": [
+        245,
+        245,
+        19
+      ]
+    }
+  ],
+  "overloadBest": "a1a8",
+  "qualityExample": {
+    "ply": 0,
+    "move": "h2h7",
+    "san": "Qxh7+",
+    "bestMove": "a1a8",
+    "bestSan": "Ra8+",
+    "quality": 100,
+    "label": "Sehr gut",
+    "explanation": "Die Engine bevorzugt Ra8+. Variante: Ra8+ Rg8 Qxh7#. Qxh7+ schlägt eine Figur. Bei bestem Gegenspiel: Matt für dich in 2.",
+    "before": {
+      "mate": 2,
+      "wdl": [
+        1000,
+        0,
+        0
+      ]
+    },
+    "played": {
+      "mate": 2,
+      "wdl": [
+        1000,
+        0,
+        0
+      ]
+    },
+    "cpLoss": null,
+    "method": "WDL",
+    "depth": 245,
+    "confidence": "normal",
+    "budget": 40000,
+    "engine": "Stockfish 19 Lite WASM",
+    "pv": [
+      "h2h7",
+      "g7h7",
+      "a1a8"
+    ],
+    "whiteCp": null,
+    "whiteMate": 2
+  },
+  "missedMate": "Matt verpasst",
+  "abortThenNewPosition": "passed"
+}

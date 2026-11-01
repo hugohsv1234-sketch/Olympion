@@ -1,0 +1,24 @@
+{
+  "count": 1001,
+  "source": "https://database.lichess.org/lichess_db_puzzle.csv.zst",
+  "sourceLastModified": "2026-10-02",
+  "importedAt": "2026-10-29T15:39:28.005Z",
+  "sourceSampleSha256": "7145c085a5dc95134e1dd6bf7bea0c13964bce058aae3c8ee81b7a498ba84398",
+  "license": "CC0-1.0",
+  "method": "60.000 Zeilen streamen; legale UCI-Folgen prüfen; Ausgangsstellungen deduplizieren; Motive und Schwierigkeit schichten.",
+  "sourceRows": 60000,
+  "rejected": 0,
+  "themes": {
+    "fork": 117,
+    "pin": 48,
+    "skewer": 25,
+    "discoveredAttack": 41,
+    "deflection": 43,
+    "attraction": 32,
+    "backRankMate": 35,
+    "mateIn1": 151,
+    "mateIn2": 122,
+    "mateIn3": 23,
+    "promotion": 26
+  }
+}

@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+.env*
+!.env.example
+*.tsbuildinfo
+test-results/
+playwright-report/
+public/engine/*.wasm
+public/engine/stockfish*.js
+tmp/
+.vercel/
