@@ -5,6 +5,7 @@ import { Chess } from 'chess.js';
 import { UciEngine, evaluateMove } from '../src/lib/engine';
 import { BOTS, pickCandidate } from '../src/lib/bots';
 import { restore, playUci, DEFAULT_POSITION } from '../src/lib/chess';
+let onSearchInfo: (() => void) | undefined;
 function factory() {
   const child = spawn(
     process.execPath,
@@ -30,6 +31,7 @@ function factory() {
     for (const s of lines) {
       if (process.env.DEBUG_ENGINE && /uciok|readyok|bestmove/.test(s)) console.log('RECV', s);
       worker.onmessage?.({ data: s.trim() });
+      if (/^info depth \d+/.test(s.trim())) onSearchInfo?.();
     }
   });
   child.on('error', (e) => worker.onerror?.(e));
@@ -82,12 +84,19 @@ try {
   assert.equal(best.method, 'WDL');
   const blunder = await evaluateMove(positions[1], 'e6f7', 40000, undefined, engine);
   assert.equal(blunder.label, 'Matt verpasst');
-  // A running aborted search must completely settle before a new position runs.
+  // Abort after real search output, not a timer: a forced mate can finish before
+  // a timer fires on a fast runner. Queue the next position before cancellation
+  // settles to exercise the scheduler with the real engine process.
   const abort = new AbortController();
-  const stale = engine.search(positions[0], { nodes: 50000000, signal: abort.signal });
-  setTimeout(() => abort.abort(), 20);
-  await assert.rejects(stale, (e) => e instanceof Error && e.name === 'AbortError');
-  const fresh = await engine.search(positions[1], { nodes: 10000, skill: 20 });
+  onSearchInfo = () => {
+    onSearchInfo = undefined;
+    abort.abort();
+  };
+  const stale = engine.search(positions[2], { nodes: 50000000, signal: abort.signal });
+  const cancelled = assert.rejects(stale, (e) => e instanceof Error && e.name === 'AbortError');
+  const queued = engine.search(positions[1], { nodes: 10000, skill: 20 });
+  await cancelled;
+  const fresh = await queued;
   const final = new Chess(positions[1].initialFen);
   playUci(final, fresh.bestMove);
   assert(final.isCheckmate());
