@@ -44,7 +44,7 @@ const nav = [
   {
     id: 'analyse',
     name: 'Partieanalyse',
-    sub: 'Apollons Einsichten',
+    sub: 'Chess.com & eigene Partien',
     icon: Crosshair,
     href: '/analyse',
   },

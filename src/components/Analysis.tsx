@@ -15,23 +15,39 @@ import {
   Minimize2,
   Square,
   Upload,
+  Play,
+  Pause,
+  Star,
+  Save,
+  Globe2,
 } from 'lucide-react';
 import type { Color } from 'chess.js';
 import { ANALYSIS_BUDGETS } from '@/lib/bots';
 import { DEFAULT_POSITION, importNotation, notation, restore, sanOf } from '@/lib/chess';
 import { evaluateMove, getEngine } from '@/lib/engine';
 import { scoreText } from '@/lib/metrics';
-import type { AnalysisRecord, GameRecord, MoveQuality, Position, SearchResult } from '@/lib/types';
+import type {
+  AnalysisRecord,
+  GameRecord,
+  MoveQuality,
+  Position,
+  SearchResult,
+  ChessComSource,
+} from '@/lib/types';
 import { download } from '@/lib/storage';
 import { useStore } from './Provider';
 import { Empty, ErrorText, Heading, Loading, QualityCard } from './Common';
 import Chessboard from './Chessboard';
+import ChessComImport from './ChessComImport';
+import AnalysisLibrary from './AnalysisLibrary';
+import type { ChessComGame } from '@/lib/chesscom';
 interface Model extends Position {
   id: string;
   name: string;
+  source?: ChessComSource;
 }
 export default function Analysis() {
-  const { records, ready, put } = useStore();
+  const { records, ready, put, settings } = useStore();
   const router = useRouter();
   const [model, setModel] = useState<Model | null>(null),
     [input, setInput] = useState(''),
@@ -45,7 +61,12 @@ export default function Analysis() {
     [arrows, setArrows] = useState(true),
     [variation, setVariation] = useState<string[]>([]),
     [positionEval, setPositionEval] = useState<SearchResult | null>(null),
-    [importOpen, setImportOpen] = useState(true);
+    [importOpen, setImportOpen] = useState(false),
+    [autoplay, setAutoplay] = useState(false),
+    [speed, setSpeed] = useState(1200),
+    [note, setNote] = useState(''),
+    [sourceOpen, setSourceOpen] = useState(true),
+    [noteSaved, setNoteSaved] = useState(false);
   const abort = useRef<AbortController | null>(null),
     root = useRef<HTMLDivElement>(null),
     initialized = useRef(false),
@@ -62,6 +83,9 @@ export default function Analysis() {
       abort.current?.abort();
       selection.current++;
       setBusy(false);
+      setAutoplay(false);
+      setSourceOpen(false);
+      setNoteSaved(false);
       setModel(m);
       setCursor(0);
       setVariation([]);
@@ -71,7 +95,9 @@ export default function Analysis() {
       const old = records.find((r) => r.id === `analysis:${m.id}:${selectedBudget}`)?.value as
         | AnalysisRecord
         | undefined;
-      setResults(old?.results || []);
+      const matches = old?.initialFen === m.initialFen && old.moves.join(' ') === m.moves.join(' ');
+      setResults(matches ? old.results : []);
+      setNote(matches ? old.note || '' : '');
       setImportOpen(false);
     },
     [records, budget],
@@ -90,7 +116,13 @@ export default function Analysis() {
       | undefined;
     if (a)
       load(
-        { id: a.gameId, name: 'Gespeicherte Analyse', initialFen: a.initialFen, moves: a.moves },
+        {
+          id: a.gameId,
+          name: a.title || 'Gespeicherte Analyse',
+          source: a.source,
+          initialFen: a.initialFen,
+          moves: a.moves,
+        },
         a.budget,
       );
   }, [ready, games, load, records]);
@@ -109,6 +141,7 @@ export default function Analysis() {
   }, []);
   const navigate = useCallback(
     (n: number) => {
+      setAutoplay(false);
       setCursor(Math.max(0, Math.min(model?.moves.length || 0, n)));
       setVariation([]);
       setPositionEval(null);
@@ -139,6 +172,16 @@ export default function Analysis() {
     }),
     [model, cursor, variation],
   );
+  useEffect(() => {
+    if (!model) return;
+    const frame = requestAnimationFrame(() =>
+      root.current?.scrollIntoView({
+        behavior: settings.motion ? 'smooth' : 'auto',
+        block: 'start',
+      }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [model, settings.motion]);
   const currentPositionKey = useRef('');
   currentPositionKey.current = JSON.stringify(position);
   const chess = useMemo(() => restore(position), [position]);
@@ -153,8 +196,8 @@ export default function Analysis() {
       setError(e instanceof Error ? e.message : String(e));
     }
   };
-  const run = async () => {
-    if (!model) return;
+  const run = async (target: Model | null = model, selectedBudget = budget) => {
+    if (!target) return;
     abort.current?.abort();
     const controller = new AbortController();
     abort.current = controller;
@@ -162,48 +205,60 @@ export default function Analysis() {
     setError('');
     setBusy(true);
     try {
-      if (!model.moves.length) {
+      if (!target.moves.length) {
         const r = await getEngine().search(position, {
-          nodes: budget,
+          nodes: selectedBudget,
           skill: 20,
           signal: controller.signal,
         });
         if (!controller.signal.aborted) setPositionEval(r);
         return;
       }
-      const saved = records.find((r) => r.id === `analysis:${model.id}:${budget}`)?.value as
-        | AnalysisRecord
-        | undefined;
-      const output = [...(saved?.results || [])];
+      const saved = records.find((r) => r.id === `analysis:${target.id}:${selectedBudget}`)
+        ?.value as AnalysisRecord | undefined;
+      const matches =
+        saved?.initialFen === target.initialFen && saved.moves.join(' ') === target.moves.join(' ');
+      const output = [...(matches ? saved.results : [])];
+      const startingColor = restore({ initialFen: target.initialFen, moves: [] }).turn();
       setResults(output);
-      for (let ply = output.length; ply < model.moves.length; ply++) {
+      for (let ply = output.length; ply < target.moves.length; ply++) {
         if (controller.signal.aborted) break;
         const r = await evaluateMove(
-          { initialFen: model.initialFen, moves: model.moves.slice(0, ply) },
-          model.moves[ply],
-          budget,
+          { initialFen: target.initialFen, moves: target.moves.slice(0, ply) },
+          target.moves[ply],
+          selectedBudget,
           controller.signal,
         );
         if (controller.signal.aborted || token !== selection.current) break;
         output.push(r);
         setResults([...output]);
         const record: AnalysisRecord = {
-          gameId: model.id,
-          initialFen: model.initialFen,
-          moves: model.moves,
-          budget,
+          ...(matches ? saved : {}),
+          title: target.name,
+          source: target.source,
+          gameId: target.id,
+          initialFen: target.initialFen,
+          moves: target.moves,
+          budget: selectedBudget,
           results: [...output],
-          complete: output.length === model.moves.length,
+          complete: output.length === target.moves.length,
+          completedAt:
+            output.length === target.moves.length ? saved?.completedAt || Date.now() : undefined,
           updatedAt: Date.now(),
         };
-        await put(`analysis:${model.id}:${budget}`, 'analysis', record);
-        const mistakeId = `mistake:${model.id}:${r.ply}`;
-        if (r.quality < 80 && !records.some((item) => item.id === mistakeId)) {
+        await put(`analysis:${target.id}:${selectedBudget}`, 'analysis', record);
+        const mistakeId = `mistake:${target.id}:${r.ply}`;
+        const moveColor = r.ply % 2 === 0 ? startingColor : startingColor === 'w' ? 'b' : 'w';
+        if (
+          r.quality < 80 &&
+          (!target.source || moveColor === target.source.color) &&
+          !records.some((item) => item.id === mistakeId)
+        ) {
           await put(mistakeId, 'mistake', {
-            initialFen: model.initialFen,
-            moves: model.moves.slice(0, r.ply),
+            initialFen: target.initialFen,
+            moves: target.moves.slice(0, r.ply),
             answer: r.bestMove,
-            gameId: model.id,
+            gameId: target.id,
             ply: r.ply,
             san: r.san,
           });
@@ -213,6 +268,102 @@ export default function Analysis() {
       if (!controller.signal.aborted) setError(e instanceof Error ? e.message : String(e));
     } finally {
       if (abort.current === controller) setBusy(false);
+    }
+  };
+  const importChessCom = async (game: ChessComGame) => {
+    if (!ready) throw new Error('Der lokale Speicher wird noch geöffnet. Bitte kurz warten.');
+    const parsed = importNotation(game.pgn);
+    if (!parsed.moves.length) throw new Error('Diese Partie enthält keine analysierbaren Züge.');
+    const previous =
+      savedAnalyses
+        .map((r) => r.value as AnalysisRecord)
+        .find(
+          (a) =>
+            a.gameId === game.id &&
+            a.initialFen === parsed.initialFen &&
+            a.moves.join(' ') === parsed.moves.join(' ') &&
+            a.complete,
+        ) ||
+      savedAnalyses
+        .map((r) => r.value as AnalysisRecord)
+        .find(
+          (a) =>
+            a.gameId === game.id &&
+            a.budget === budget &&
+            a.initialFen === parsed.initialFen &&
+            a.moves.join(' ') === parsed.moves.join(' '),
+        );
+    const selectedBudget = previous?.budget || budget;
+    const target: Model = {
+      ...parsed,
+      id: game.id,
+      name: game.source.white + ' vs. ' + game.source.black,
+      source: game.source,
+    };
+    const record: AnalysisRecord = {
+      ...previous,
+      gameId: game.id,
+      ...parsed,
+      title: target.name,
+      source: target.source,
+      budget: selectedBudget,
+      results: previous?.results || [],
+      complete: previous?.complete || false,
+      updatedAt: Date.now(),
+    };
+    await put('analysis:' + game.id + ':' + selectedBudget, 'analysis', record);
+    load(target, selectedBudget);
+    setOrientation(game.source.color);
+    if (!record.complete) void run(target, selectedBudget);
+  };
+  const openSaved = (a: AnalysisRecord) => {
+    load(
+      {
+        id: a.gameId,
+        name: a.title || 'Gespeicherte Analyse',
+        initialFen: a.initialFen,
+        moves: a.moves,
+        source: a.source,
+      },
+      a.budget,
+    );
+    if (a.source) setOrientation(a.source.color);
+  };
+  useEffect(() => {
+    if (!autoplay || !model) return;
+    if (cursor >= model.moves.length) {
+      setAutoplay(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setCursor(cursor + 1);
+      setVariation([]);
+      setPositionEval(null);
+    }, speed);
+    return () => clearTimeout(timer);
+  }, [autoplay, cursor, model, speed]);
+  const saveMetadata = async (favorite?: boolean) => {
+    if (!model || busy) return;
+    const id = 'analysis:' + model.id + ':' + budget;
+    const previous = records.find((r) => r.id === id)?.value as AnalysisRecord | undefined;
+    try {
+      await put(id, 'analysis', {
+        ...previous,
+        gameId: model.id,
+        initialFen: model.initialFen,
+        moves: model.moves,
+        title: model.name,
+        source: model.source,
+        budget,
+        results,
+        complete: Boolean(model.moves.length && results.length === model.moves.length),
+        note,
+        favorite: favorite ?? previous?.favorite ?? false,
+        updatedAt: Date.now(),
+      } satisfies AnalysisRecord);
+      setNoteSaved(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Notiz konnte nicht gespeichert werden.');
     }
   };
   const currentAnalysis = async () => {
@@ -245,6 +396,8 @@ export default function Analysis() {
         | AnalysisRecord
         | undefined;
       setResults(old?.results || []);
+      setNote(old?.note || '');
+      setNoteSaved(false);
     }
   };
   const full = async () => {
@@ -307,13 +460,19 @@ export default function Analysis() {
       <Heading
         god="APOLLON · PARTIEANALYSE"
         title="Verstehe, was möglich war."
-        description="Jeder Fehler ist eine Stellung, aus der du lernen kannst."
+        description="Deine Partien. Echte Berechnung. Ein klarer Plan für den nächsten Zug."
       >
+        <button className="button secondary" onClick={() => setSourceOpen((v) => !v)}>
+          <Globe2 size={16} /> Chess.com-Partien
+        </button>
         <button className="button secondary" onClick={() => setImportOpen(!importOpen)}>
           <Upload size={16} />
           PGN oder FEN importieren
         </button>
       </Heading>
+      {sourceOpen && (
+        <ChessComImport onSelect={importChessCom} analyzing={busy} activeId={model?.id} />
+      )}
       {importOpen && (
         <section className="panel import-panel">
           <div>
@@ -405,7 +564,8 @@ export default function Analysis() {
                         load(
                           {
                             id: a.gameId,
-                            name: 'Gespeicherte Analyse',
+                            name: a.title || 'Gespeicherte Analyse',
+                            source: a.source,
                             initialFen: a.initialFen,
                             moves: a.moves,
                           },
@@ -463,6 +623,32 @@ export default function Analysis() {
               </button>
             </div>
           </div>
+          {model.source && (
+            <div className="analysis-player-strip">
+              <div className="player-monogram">{model.source.username[0].toUpperCase()}</div>
+              <div>
+                <span className="eyebrow">DEINE CHESS.COM-PARTIE</span>
+                <strong>{model.source.username}</strong>
+                <small>
+                  Du spielst {model.source.color === 'w' ? 'Weiß' : 'Schwarz'} ·{' '}
+                  {model.source.timeClass} ·{' '}
+                  {new Date(model.source.endedAt).toLocaleDateString('de-DE')}
+                </small>
+              </div>
+              <div className="player-quality">
+                <small>Deine Zugqualität</small>
+                <strong>
+                  {(() => {
+                    const own = results.filter((r) => colorFor(r.ply) === model.source!.color);
+                    return own.length
+                      ? (own.reduce((n, r) => n + r.quality, 0) / own.length).toFixed(1) + ' %'
+                      : '–';
+                  })()}
+                </strong>
+                <small>OLYMPION · berechnete Züge</small>
+              </div>
+            </div>
+          )}
           <div className="play-layout analysis-layout">
             <div className="board-column">
               <div className="evaluation-board">
@@ -481,6 +667,7 @@ export default function Analysis() {
                   fen={chess.fen()}
                   orientation={orientation}
                   onMove={(m) => {
+                    setAutoplay(false);
                     setVariation((xs) => [...xs, m]);
                     setPositionEval(null);
                   }}
@@ -505,6 +692,18 @@ export default function Analysis() {
                 >
                   <ChevronLeft size={23} />
                 </button>
+                <button
+                  className="icon-button playback-button"
+                  aria-label={autoplay ? 'Wiedergabe pausieren' : 'Partie automatisch abspielen'}
+                  disabled={!model.moves.length}
+                  aria-pressed={autoplay}
+                  onClick={() => {
+                    if (!autoplay && cursor >= model.moves.length) navigate(0);
+                    setAutoplay((v) => !v);
+                  }}
+                >
+                  {autoplay ? <Pause size={19} /> : <Play size={19} />}
+                </button>
                 <span>
                   {cursor} / {model.moves.length}
                 </span>
@@ -524,6 +723,18 @@ export default function Analysis() {
                 >
                   <ChevronsRight size={21} />
                 </button>
+                <label className="playback-speed">
+                  <span className="sr-only">Wiedergabegeschwindigkeit</span>
+                  <select
+                    aria-label="Wiedergabegeschwindigkeit"
+                    value={speed}
+                    onChange={(e) => setSpeed(Number(e.target.value))}
+                  >
+                    <option value={2000}>0,5×</option>
+                    <option value={1200}>1×</option>
+                    <option value={700}>2×</option>
+                  </select>
+                </label>
                 <div className="nav-divider" />
                 <button
                   className="icon-button"
@@ -675,6 +886,60 @@ export default function Analysis() {
                   </p>
                 </section>
               )}
+              <section className="panel analysis-notes">
+                <div className="panel-top">
+                  <h2>Dein Lehrbuch</h2>
+                  <button
+                    className="icon-button"
+                    aria-label="Analyse als Favorit markieren"
+                    disabled={busy}
+                    aria-pressed={Boolean(
+                      (
+                        records.find((r) => r.id === 'analysis:' + model.id + ':' + budget)
+                          ?.value as AnalysisRecord | undefined
+                      )?.favorite,
+                    )}
+                    onClick={() =>
+                      void saveMetadata(
+                        !(
+                          records.find((r) => r.id === 'analysis:' + model.id + ':' + budget)
+                            ?.value as AnalysisRecord | undefined
+                        )?.favorite,
+                      )
+                    }
+                  >
+                    <Star
+                      size={18}
+                      fill={
+                        (
+                          records.find((r) => r.id === 'analysis:' + model.id + ':' + budget)
+                            ?.value as AnalysisRecord | undefined
+                        )?.favorite
+                          ? 'currentColor'
+                          : 'none'
+                      }
+                    />
+                  </button>
+                </div>
+                <label className="field">
+                  Deine Erkenntnis
+                  <textarea
+                    rows={3}
+                    maxLength={1000}
+                    value={note}
+                    disabled={busy}
+                    onChange={(e) => {
+                      setNote(e.target.value);
+                      setNoteSaved(false);
+                    }}
+                    placeholder="Was möchtest du in der nächsten Partie besser machen?"
+                  />
+                </label>
+                <button className="text-button" disabled={busy} onClick={() => void saveMetadata()}>
+                  <Save size={15} /> {noteSaved ? 'Gespeichert' : 'Notiz speichern'}
+                </button>
+                <small>Favoriten und Notizen bleiben in deinem Analyse-Archiv.</small>
+              </section>
               <section className="panel move-panel">
                 <div className="panel-top">
                   <h2>Zugfolge</h2>
@@ -758,6 +1023,7 @@ export default function Analysis() {
           erscheinen erst nach echter Engineberechnung.
         </Empty>
       )}
+      <AnalysisLibrary busy={busy} onOpen={openSaved} />
     </>
   );
 }

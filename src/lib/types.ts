@@ -125,6 +125,25 @@ export interface AnalysisRecord {
   results: MoveQuality[];
   complete: boolean;
   updatedAt: number;
+  completedAt?: number;
+  title?: string;
+  source?: ChessComSource;
+  favorite?: boolean;
+  note?: string;
+}
+export interface ChessComSource {
+  provider: 'chess.com';
+  username: string;
+  color: Color;
+  white: string;
+  black: string;
+  whiteRating?: number;
+  blackRating?: number;
+  result: 'win' | 'loss' | 'draw';
+  timeClass: string;
+  timeControl: string;
+  endedAt: number;
+  url: string;
 }
 export interface LessonResult {
   lessonId: string;

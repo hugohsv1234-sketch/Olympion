@@ -68,3 +68,14 @@ Training, Puzzles, Arena, Analyse, Akademie, Fortschritt und Profil wurden bei a
 - **Keine Elo-Kalibrierung:** Die funktionierenden 20 Konfigurationen sind keine empirisch kalibrierten Elo-Stufen.
 
 Es wird keine absolute Fehlerfreiheit behauptet. Die Datei beschreibt die tatsächlich ausgeführten Prüfungen und ihre Grenzen.
+
+## Erweiterung am 2. November 2026
+
+- Chess.com-Anbindung über die offizielle öffentliche API, ohne Zugangsdaten. Profil, Wertungen und Monatsarchive werden seriell geladen. CORS-Unterstützung mit `Access-Control-Allow-Origin: *` an der realen Schnittstelle geprüft.
+- Reales öffentliches Testprofil: Monatsarchiv mit 583 Standardpartien geladen; eine abgeschlossene Partie über **37 Halbzüge** vollständig im Browser mit dem ausgelieferten Stockfish-Worker analysiert. Weiß-/Schwarz-Statistiken und eigene Spielerperspektive angezeigt.
+- Gegnerfilter, automatischer Import von der Startseite, gespeicherte Analyse, Favorit und persönliche Notiz im Browser geprüft. Analyse und Notiz nach vollständigem Seitenwechsel wieder geöffnet.
+- Automatische Wiedergabe bis zur Schlussstellung und drei Wiedergabegeschwindigkeiten verfügbar. Fehlerübungen aus Chess.com-Importen werden nur für die Seite des eingegebenen Spielers automatisch angelegt.
+- Dashboard und Analyse bei Rahmenbreiten 360, 390, 768, 1024 und 1440 px geprüft: kein horizontaler Seitenüberlauf; das Analysebrett bleibt quadratisch. Die übrigen sechs Produktbereiche zusätzlich bei 360 und 768 px geprüft. Der Scrollbalken verringert in dieser Browserumgebung die innere Inhaltsbreite um 15 px.
+- Neun zusätzliche automatisierte Tests prüfen API-Namensvalidierung, fremde Archiv-URLs, abgeschlossene Standardpartien, Duplikate, Farben/Ergebnisse, Cache, serielle Anfragen, Fehlercodes, Abbruch und sichere Backup-Metadaten.
+
+Die neue Anbindung verwendet ausschließlich öffentliche, bereits abgeschlossene Partien. Die Verfügbarkeit und Aktualität des externen Archivs hängen von Chess.com ab. Eine echte Touch-/Safari-Hardwareprüfung wird durch die Browserprüfung nicht ersetzt.

@@ -1,5 +1,8 @@
 'use client';
 import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { normalizeUsername } from '@/lib/chesscom';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -9,16 +12,17 @@ import {
   Flame,
   GraduationCap,
   Puzzle,
-  Shield,
   Swords,
   Target,
   Trophy,
+  Clock3,
+  Globe2,
+  Columns3,
 } from 'lucide-react';
 import { useStore } from './Provider';
 import { ActionLink, Empty, Heading, Portrait } from './Common';
 import { attemptsFrom, duePuzzles, localDay, ratingHistory, streak, THEMES } from '@/lib/puzzles';
 import type { AnalysisRecord, GameRecord, LessonResult, Mistake } from '@/lib/types';
-import Chessboard, { Piece } from './Chessboard';
 export function useStats() {
   const { records } = useStore();
   const attempts = attemptsFrom(records),
@@ -61,158 +65,358 @@ export function useStats() {
   };
 }
 export function Home() {
-  const { settings } = useStore();
+  const { settings, records, ready } = useStore();
+  const router = useRouter();
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
   const s = useStats();
+  const today = localDay();
+  const analyses = records
+    .filter((r) => r.kind === 'analysis')
+    .map((r) => r.value as AnalysisRecord);
+  const solvedToday = new Set(
+    s.attempts.filter((a) => a.success && localDay(a.at) === today).map((a) => a.puzzleId),
+  ).size;
+  const reviewedToday = analyses.some(
+    (a) => a.complete && a.completedAt && localDay(a.completedAt) === today,
+  );
+  const learnedToday = s.lessons.some((l) => l.completed && localDay(l.at) === today);
+  const missions = [
+    {
+      title: 'Schärfe deinen Blick',
+      text: 'Drei Taktikaufgaben. Drei neue Ideen.',
+      href: '/puzzles?mode=series',
+      progress: Math.min(3, solvedToday) + ' / 3',
+      done: solvedToday >= 3,
+      icon: Puzzle,
+    },
+    {
+      title: 'Verstehe deine Partie',
+      text: 'Analysiere eine Partie mit Stockfish.',
+      href: '/analyse',
+      progress: reviewedToday ? 'Erledigt' : '0 / 1',
+      done: reviewedToday,
+      icon: Target,
+    },
+    {
+      title: 'Lerne ein Prinzip',
+      text: 'Schließe eine Lektion in der Akademie ab.',
+      href: '/akademie',
+      progress: learnedToday ? 'Erledigt' : '0 / 1',
+      done: learnedToday,
+      icon: GraduationCap,
+    },
+  ];
+  const days = ready
+    ? Array.from({ length: 7 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - 6 + i);
+        const day = localDay(date.getTime());
+        const active =
+          s.attempts.some((a) => localDay(a.at) === day) ||
+          s.lessons.some((l) => l.completed && localDay(l.at) === day) ||
+          records.some(
+            (r) =>
+              r.kind === 'session' &&
+              (r.value as { seconds: number }).seconds > 0 &&
+              localDay((r.value as { at: number }).at) === day,
+          );
+        return {
+          key: day,
+          label: date.toLocaleDateString('de-DE', { weekday: 'narrow' }),
+          day: date.getDate(),
+          active,
+        };
+      })
+    : [];
+  const progress = Math.min(100, Math.round((s.today / (settings.goal * 60)) * 100));
   return (
     <>
-      <div className="home-kicker">
-        <span>ATHENES SCHACHAKADEMIE</span>
-        <span>STRATEGIE. TAKTIK. AUFSTIEG.</span>
+      <div className="olymp-welcome">
+        <div>
+          <span className="live-indicator" /> DEIN PLATZ AUF DEM OLYMP
+        </div>
+        <span>
+          {settings.name === 'Gast'
+            ? 'Deine nächste gute Entscheidung beginnt hier.'
+            : 'Willkommen zurück, ' + settings.name + '.'}
+        </span>
       </div>
-      <section className="hero">
+      <section className="olymp-hero">
         <img
           src="/images/athena.webp"
-          alt="Marmorstatue der Athene vor einem griechischen Tempel"
-          width="1672"
-          height="941"
+          alt="Athene aus Marmor vor einem antiken griechischen Tempel"
+          width={1672}
+          height={941}
           fetchPriority="high"
         />
-        <div className="hero-shade" />
-        <div className="hero-content">
-          <span className="eyebrow">WISSEN WIRD SPIELSTÄRKE</span>
+        <div className="olymp-hero-shade" />
+        <div className="olymp-hero-content">
+          <div className="hero-seal">
+            <Columns3 size={16} />
+            <span>GEFORMT DURCH STRATEGIE</span>
+          </div>
           <h1>
-            Denke voraus.
+            Dein Zug.
             <br />
-            Erreiche den
-            <br />
-            <em>Olymp.</em>
+            <em>Dein Olymp.</em>
           </h1>
           <p>
-            Trainiere deinen Blick. Fordere die Götter heraus.
-            <br className="desktop-only" /> Verstehe jeden deiner Züge.
+            Sieh mehr als den nächsten Zug.
+            <br />
+            Trainiere mit Athene. Spiele gegen die Götter.
+            <br className="desktop-only" /> Lerne aus deinen eigenen Partien.
           </p>
           <div className="hero-actions">
-            <ActionLink href="/training">Dein Training beginnen</ActionLink>
-            <Link href="/arena" className="hero-secondary">
-              Zur Arena <ArrowUpRight size={17} />
+            <ActionLink href="/training">Jetzt besser werden</ActionLink>
+            <Link className="hero-secondary" href="/arena">
+              Betritt die Arena <Swords size={17} />
             </Link>
           </div>
         </div>
-        <div className="hero-caption">
-          <span>ATHENE</span>
-          <small>Göttin der Weisheit & Strategie</small>
+        <div className="hero-god-label">
+          <span>01 / ATHENE</span>
+          <strong>
+            Weisheit ist
+            <br />
+            dein stärkster Zug.
+          </strong>
+          <span className="god-rule" />
         </div>
-        <span className="hero-index">01 — ΟΛΥΜΠΟΣ</span>
+        <div className="hero-coordinate" aria-hidden="true">
+          ΑΘΗΝΑ · STRATEGIE & WEISHEIT
+        </div>
       </section>
-      <div className="feature-strip">
-        <span>
-          <Puzzle size={16} />
-          <strong>1.000+</strong> echte Taktikaufgaben
-        </span>
-        <span>
-          <Swords size={16} />
-          <strong>20</strong> göttliche Gegner
-        </span>
-        <span>
-          <Target size={16} />
-          Echte Computeranalyse
-        </span>
-        <span>
-          <Shield size={16} />
-          Dein Fortschritt bleibt
-        </span>
+      <div className="home-stats-grid">
+        {[
+          {
+            label: 'Dein Puzzle-Rating',
+            value: s.rating,
+            note: s.history.length ? 'Deine Trainingswertung' : 'Startwert · dein Weg beginnt',
+            icon: Trophy,
+          },
+          {
+            label: 'Gelöste Aufgaben',
+            value: s.solved,
+            note: 'Aus deinen echten Ergebnissen',
+            icon: Puzzle,
+          },
+          {
+            label: 'Deine Trainingsserie',
+            value: s.streak,
+            note: s.streak === 1 ? 'Tag in Folge' : 'Tage in Folge',
+            icon: Flame,
+          },
+          {
+            label: 'Heute trainiert',
+            value: Math.floor(s.today / 60) + ' Min.',
+            note: 'Dein Tagesziel: ' + settings.goal + ' Minuten',
+            icon: Clock3,
+          },
+        ].map((stat) => (
+          <Link href="/fortschritt" className="home-stat" key={stat.label}>
+            <div>
+              <span>{stat.label}</span>
+              <stat.icon size={17} />
+            </div>
+            <strong>{stat.value}</strong>
+            <small>{stat.note}</small>
+          </Link>
+        ))}
       </div>
-      <div className="section-title">
-        <div>
-          <span className="eyebrow">DEIN NÄCHSTER SCHRITT</span>
-          <h2>Ein guter Zug beginnt hier.</h2>
+      <section className="chesscom-launch">
+        <div className="launch-symbol">
+          <Globe2 size={27} />
         </div>
-        <Link href="/training">
-          Mein Trainingsplan <ArrowRight size={16} />
-        </Link>
-      </div>
-      <div className="entry-grid">
-        <Link className="entry puzzle-entry" href="/puzzles?mode=daily">
-          <div className="entry-top">
-            <span>01 / ATHENE</span>
-            <ArrowUpRight size={20} />
-          </div>
-          <div className="mini-board">
-            <Chessboard
-              fen="6k1/pp3rpp/8/5q2/8/5Q2/PP4PP/4R1K1 w - - 0 1"
-              disabled
-              label="Taktikvorschau"
+        <div className="launch-copy">
+          <span className="eyebrow">NEU · DEINE PARTIEN IM FOKUS</span>
+          <h2>Dein Chess.com-Name genügt.</h2>
+          <p>Entdecke deine Wendepunkte. Entwickle deinen eigenen Spielstil.</p>
+        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            try {
+              setError('');
+              router.push('/analyse?chesscom=' + encodeURIComponent(normalizeUsername(name)));
+            } catch (e) {
+              setError((e as Error).message);
+            }
+          }}
+        >
+          <label className="sr-only" htmlFor="home-chesscom">
+            Dein Chess.com-Name
+          </label>
+          <div className="launch-field">
+            <input
+              id="home-chesscom"
+              value={name}
+              maxLength={50}
+              autoCapitalize="none"
+              spellCheck={false}
+              placeholder="Dein Chess.com-Name"
+              onChange={(e) => setName(e.target.value)}
             />
+            <button type="submit" aria-label="Chess.com-Partien laden" disabled={!name.trim()}>
+              <ArrowRight size={21} />
+            </button>
           </div>
-          <div className="entry-bottom">
-            <span className="eyebrow">SCHÄRFE DEINEN BLICK</span>
-            <h3>Das tägliche Rätsel</h3>
-            <p>Ein neues Problem. Eine klare Idee.</p>
-          </div>
-        </Link>
-        <Link className="entry arena-entry" href="/arena">
-          <div className="entry-top">
-            <span>02 / ARES</span>
-            <ArrowUpRight size={20} />
-          </div>
-          <div className="arena-art">
-            <Portrait level={12} size="hero-portrait" />
-            <span className="arena-rings" />
-          </div>
-          <div className="entry-bottom">
-            <span className="eyebrow">STELLE DICH DER HERAUSFORDERUNG</span>
-            <h3>Spiele gegen die Götter</h3>
-            <p>Von Hermes bis Zeus. Wähle deinen Gegner.</p>
-          </div>
-        </Link>
-        <Link className="entry plan-entry" href="/analyse">
-          <div className="entry-top">
-            <span>03 / APOLLON</span>
-            <ArrowUpRight size={20} />
-          </div>
-          <div className="analysis-art">
-            <span>
-              <Piece type="r" color="w" />
+          <small>Ohne Passwort. Echte Stockfish-Analyse.</small>
+          {error && (
+            <span className="inline-error" role="alert">
+              {error}
             </span>
-            <div className="art-rule" />
-            <svg viewBox="0 0 230 70" aria-hidden="true">
-              <path
-                d="M0 48 25 48 40 40 60 42 75 25 95 29 110 18 130 32 150 20 170 23 190 8 230 8"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-              />
-            </svg>
-            <small>VERSTEHEN. VERBESSERN.</small>
+          )}
+        </form>
+      </section>
+      <div className="home-daily-grid">
+        <section className="mission-board">
+          <div className="section-title">
+            <div>
+              <span className="eyebrow">KLEINE SCHRITTE. GROSSE WIRKUNG.</span>
+              <h2>Deine Missionen für heute.</h2>
+            </div>
+            <span className="mission-count">{missions.filter((m) => m.done).length} / 3</span>
           </div>
-          <div className="entry-bottom">
-            <span className="eyebrow">LERNE AUS JEDEM ZUG</span>
-            <h3>Deine Partie. Dein Lehrbuch.</h3>
-            <p>Importiere eine PGN und entdecke die Wendepunkte.</p>
+          <div className="mission-list">
+            {missions.map((mission, i) => (
+              <Link
+                href={mission.href}
+                className={'mission-row ' + (mission.done ? 'done' : '')}
+                key={mission.title}
+              >
+                <span className="mission-icon">
+                  {mission.done ? <Check size={21} /> : <mission.icon size={21} />}
+                </span>
+                <div>
+                  <small>MISSION 0{i + 1}</small>
+                  <h3>{mission.title}</h3>
+                  <p>{mission.text}</p>
+                </div>
+                <span className="mission-state">
+                  {mission.progress}
+                  <ArrowUpRight size={17} />
+                </span>
+              </Link>
+            ))}
           </div>
-        </Link>
+        </section>
+        <section className="weekly-board">
+          <span className="eyebrow">DEIN RHYTHMUS</span>
+          <h2>Jeder Tag ein Schritt.</h2>
+          <div
+            className="goal-orbit"
+            style={{ background: 'conic-gradient(#e7e9e9 ' + progress + '%, #24292d 0)' }}
+            role="img"
+            aria-label={progress + ' Prozent deines Tagesziels erreicht'}
+          >
+            <div>
+              <strong>
+                {Math.floor(s.today / 60)}
+                <small>MIN.</small>
+              </strong>
+              <span>von {settings.goal} heute</span>
+            </div>
+          </div>
+          <div className="week-days" aria-label="Deine letzten sieben Trainingstage">
+            {days.map((day) => (
+              <div
+                className={'week-day ' + (day.active ? 'active' : '')}
+                key={day.key}
+                title={day.key + (day.active ? ' · trainiert' : ' · kein Training')}
+              >
+                <span>{day.label}</span>
+                <strong>{day.active ? <Check size={15} /> : day.day}</strong>
+              </div>
+            ))}
+          </div>
+          <p>{days.filter((d) => d.active).length} aktive Tage in den letzten 7 Tagen.</p>
+          <Link href="/training" className="text-button">
+            Deinen Trainingsplan öffnen <ArrowRight size={15} />
+          </Link>
+        </section>
       </div>
-      <section className="welcome-banner">
-        <Compass size={28} />
+      <div className="section-title mode-heading">
         <div>
-          <h3>
-            {s.attempts.length
-              ? `Willkommen zurück, ${settings.name}.`
-              : 'Dein Aufstieg beginnt bei null.'}
-          </h3>
-          <p>
-            {s.attempts.length
-              ? `${s.solved} gelöste Aufgaben. ${s.due.length} Wiederholungen warten auf dich.`
-              : 'Keine erfundenen Zahlen. Dein Fortschritt entsteht mit deinem ersten Training.'}
-          </p>
+          <span className="eyebrow">WÄHLE DEINE HERAUSFORDERUNG</span>
+          <h2>Was ist dein nächster Zug?</h2>
         </div>
-        <ActionLink secondary href="/fortschritt">
-          Meinen Aufstieg ansehen
+        <span>Ein Olymp. Viele Wege nach oben.</span>
+      </div>
+      <div className="olymp-mode-grid">
+        {[
+          {
+            name: 'Athenes Prüfung',
+            label: 'TAKTIK & PUZZLES',
+            number: 'I',
+            text: 'Über 1.000 echte Stellungen. Trainiere deinen Blick für das Entscheidende.',
+            href: '/puzzles',
+            god: 19,
+            button: 'Taktik trainieren',
+            icon: Puzzle,
+          },
+          {
+            name: 'Die Arena der Götter',
+            label: '20 STOCKFISH-GEGNER',
+            number: 'II',
+            text: 'Von Hermes bis Zeus. Finde deinen Gegner und wachse an jedem Duell.',
+            href: '/arena',
+            god: 12,
+            button: 'Gegner auswählen',
+            icon: Swords,
+          },
+          {
+            name: 'Apollons Einsichten',
+            label: 'DEINE PERSÖNLICHE ANALYSE',
+            number: 'III',
+            text: 'Deine eigenen Partien werden zu deinem besten Lehrbuch. Verstehe jeden Zug.',
+            href: '/analyse',
+            god: 9,
+            button: 'Partien analysieren',
+            icon: Target,
+          },
+        ].map((mode) => (
+          <article className="olymp-mode-card" key={mode.name}>
+            <div className="mode-card-top">
+              <mode.icon size={20} />
+              <span>{mode.number}</span>
+            </div>
+            <div className="mode-statue">
+              <img
+                src={'/images/god-' + mode.god + '.webp'}
+                alt=""
+                width={250}
+                height={300}
+                loading="lazy"
+              />
+            </div>
+            <div className="mode-card-content">
+              <span className="eyebrow">{mode.label}</span>
+              <h3>{mode.name}</h3>
+              <p>{mode.text}</p>
+              <Link href={mode.href}>
+                {mode.button}
+                <ArrowUpRight size={18} />
+              </Link>
+            </div>
+          </article>
+        ))}
+      </div>
+      <section className="olymp-manifesto">
+        <Columns3 size={34} />
+        <div>
+          <span className="eyebrow">WISSEN WIRD SPIELSTÄRKE</span>
+          <h2>Dein stärkster Gegner war gestern du.</h2>
+          <p>Heute gehst du einen Zug weiter.</p>
+        </div>
+        <ActionLink secondary href="/akademie">
+          Die Akademie entdecken
         </ActionLink>
       </section>
     </>
   );
 }
+
 export function Training() {
   const { settings, put, records } = useStore();
   const s = useStats();

@@ -49,6 +49,29 @@ function quality(x: unknown) {
     (x.whiteMate === null || number(x.whiteMate, -1000, 1000))
   );
 }
+function source(x: unknown) {
+  return (
+    isObject(x) &&
+    x.provider === 'chess.com' &&
+    typeof x.username === 'string' &&
+    /^[A-Za-z0-9_-]{2,50}$/.test(x.username) &&
+    ['w', 'b'].includes(x.color as string) &&
+    typeof x.white === 'string' &&
+    x.white.length > 0 &&
+    text(x.white, 50) &&
+    typeof x.black === 'string' &&
+    x.black.length > 0 &&
+    text(x.black, 50) &&
+    ['win', 'loss', 'draw'].includes(x.result as string) &&
+    text(x.timeClass, 25) &&
+    text(x.timeControl, 50) &&
+    number(x.endedAt, 0, 4102444800000) &&
+    (x.whiteRating === undefined || number(x.whiteRating, 0, 5000)) &&
+    (x.blackRating === undefined || number(x.blackRating, 0, 5000)) &&
+    typeof x.url === 'string' &&
+    /^https:\/\/www\.chess\.com\/game\/(live|daily)\/\d{1,24}$/.test(x.url)
+  );
+}
 export function validPayload(kind: string, input: unknown) {
   if (!isObject(input)) return false;
   const p = input;
@@ -100,6 +123,11 @@ export function validPayload(kind: string, input: unknown) {
       p.results.length < 501 &&
       p.results.every(quality) &&
       typeof p.complete === 'boolean' &&
+      (p.completedAt === undefined || number(p.completedAt)) &&
+      (p.title === undefined || text(p.title, 200)) &&
+      (p.note === undefined || text(p.note, 1000)) &&
+      (p.favorite === undefined || typeof p.favorite === 'boolean') &&
+      (p.source === undefined || source(p.source)) &&
       number(p.updatedAt)
     );
   if (kind === 'lesson')

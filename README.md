@@ -49,6 +49,18 @@ Die App erzeugt einen statischen Next.js-Export in `out/`. `npm start` verwendet
 - PWA mit App-Icons, Service Worker und kontrolliertem Engine-/Puzzledownload.
 - Lokale Schriften, originale Schachfiguren als SVG und für OLYMPION erzeugte monochrome Statuenbilder.
 
+## Chess.com-Partien analysieren
+
+Auf der Startseite deinen **Chess.com-Benutzernamen** eingeben und auf den Pfeil klicken. Alternativ **Partieanalyse → Chess.com-Partien** öffnen. OLYMPION lädt das öffentliche Monatsarchiv mit abgeschlossenen Standardpartien. Du kannst nach Monat, Bedenkzeit, Ergebnis und Gegner filtern. **Partie analysieren** öffnet das Brett und startet die lokale Stockfish-Analyse; vorhandene vollständige Analysen werden wieder geöffnet.
+
+- Kein Passwort, API-Schlüssel oder Chess.com-Login nötig. Die Anfragen gehen nacheinander direkt an die öffentliche Chess.com-Schnittstelle; neue Partien können dort zeitversetzt erscheinen.
+- Die angezeigte Zugqualität ist die eigene OLYMPION-Metrik aus Stockfish-Suchen. Eine vorhandene Chess.com-Genauigkeitszahl wird nicht übernommen.
+- Analysen, Favoriten und persönliche Notizen werden im bestehenden Profil gespeichert. Das Analyse-Archiv öffnet sie auch nach einem Neuladen. Die automatische Zugwiedergabe hat drei Geschwindigkeiten.
+- Bei importierten Chess.com-Partien werden Fehlerübungen automatisch aus den Zügen des eingegebenen Spielers angelegt.
+- Tagesmissionen und der Wochenüberblick verwenden ausschließlich gespeicherte Trainingsergebnisse. Die Analyse-Mission zählt neu abgeschlossene Analysen.
+
+Die Oberfläche und Spielregeln bleiben eine eigenständige OLYMPION-Entwicklung. OLYMPION ist nicht mit Chess.com verbunden. [Offizielle API-Dokumentation](https://support.chess.com/en/articles/9650547-what-is-the-pubapi-and-how-do-i-use-it).
+
 ## Architektur
 
 | Bereich                                 | Ort                                               |
