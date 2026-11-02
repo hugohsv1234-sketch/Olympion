@@ -33,9 +33,9 @@ Das erstellt bei Bedarf eine eigene private Kopie. Für das vorhandene Repositor
 ## 3. Auf Vercel importieren
 
 1. Auf Vercel **Add New → Project** wählen und das neue GitHub-Repository importieren.
-2. Framework: **Next.js**. Projektwurzel ist der Ordner mit `package.json`.
+2. Framework Preset: **Other**. Projektwurzel ist der Ordner mit `package.json`. Die App wird mit Next.js gebaut und anschließend als statischer Export veröffentlicht.
 3. Node-Version: **22.x**.
-4. `vercel.json` enthält bereits: Install `npm ci --include=dev`, Build `npm run build`, Ausgabe `out`.
+4. `vercel.json` enthält bereits: Framework `null` (**Other**), Install `npm ci --include=dev`, Build `npm run build`, Ausgabe `out`.
 5. Ohne Konten werden zunächst keine Umgebungsvariablen benötigt.
 6. **Deploy** wählen. Öffne die von Vercel tatsächlich zurückgegebene HTTPS-Adresse.
 

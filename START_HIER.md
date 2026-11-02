@@ -7,7 +7,7 @@ Repository: **[hugohsv1234-sketch/Olympion](https://github.com/hugohsv1234-sketc
 1. Im Vercel-Dashboard **Add New → Project** wählen.
 2. Das GitHub-Repository **Olympion** importieren. Falls es nicht erscheint, Vercel in der GitHub-Auswahl Zugriff auf dieses Repository geben.
 3. **Root Directory:** Projektwurzel unverändert lassen. Keinen zusätzlichen Unterordner eintragen.
-4. **Framework Preset:** Next.js. **Node.js:** 22.x.
+4. **Framework Preset:** Other. **Node.js:** 22.x. `framework: null` in `vercel.json` setzt dieses Preset für den statischen Export.
 5. Die enthaltene `vercel.json` setzt Install Command `npm ci --include=dev`, Build Command `npm run build` und Output Directory `out`.
 6. Für den Gastbetrieb keine Umgebungsvariablen eintragen.
 7. **Deploy** anklicken und auf den fertigen Build warten. Vercel zeigt anschließend die Website-Adresse an.

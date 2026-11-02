@@ -7,8 +7,8 @@ Eine deutschsprachige Schachakademie in Schwarz, Weiß und Grau, inspiriert von 
 Repository: **[hugohsv1234-sketch/Olympion](https://github.com/hugohsv1234-sketch/Olympion)**. Die Projektdateien liegen direkt auf dem Branch `main` in der Repository-Wurzel.
 
 1. In Vercel **Add New → Project** wählen.
-2. Das GitHub-Repository **Olympion** importieren. Framework: **Next.js**, Root Directory: Projektwurzel, Node.js: **22.x**.
-3. **Deploy** anklicken. Installationsbefehl, Build und Ausgabeverzeichnis stehen bereits in `vercel.json`.
+2. Das GitHub-Repository **Olympion** importieren. Framework Preset: **Other**, Root Directory: Projektwurzel, Node.js: **22.x**.
+3. **Deploy** anklicken. Installationsbefehl, Build und Ausgabeverzeichnis stehen bereits in `vercel.json`. `framework: null` wählt **Other**, damit Vercel den fertigen statischen Export aus `out/` veröffentlicht.
 
 Kein API-Schlüssel nötig. Fortschritt wird zunächst auf dem jeweiligen Gerät gespeichert. Konten und Synchronisierung zwischen Geräten lassen sich optional später mit Supabase einrichten.
 
