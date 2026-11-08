@@ -1,7 +1,7 @@
 import type { EngineLine, EngineScore, MoveQuality, Position, SearchResult } from './types';
-import { restore, sanOf, notation, playUci } from './chess.js';
-import { BOTS, pickCandidate } from './bots.js';
-import { expectation, qualityMetric, qualityLabel } from './metrics.js';
+import { restore, sanOf, notation, playUci } from './chess';
+import { BOTS, pickCandidate } from './bots';
+import { expectation, qualityMetric, qualityLabel } from './metrics';
 export interface SearchOptions {
   nodes: number;
   skill?: number;

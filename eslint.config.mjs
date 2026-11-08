@@ -11,5 +11,5 @@ export default defineConfig([
       'react-hooks/refs': 'off',
     },
   },
-  globalIgnores(['.next/**', 'public/**', 'tmp/**', 'next-env.d.ts']),
+  globalIgnores(['.next/**', 'public/**', 'tmp/**', 'next-env.d.ts', 'server/ranking.bundle.mjs']),
 ]);

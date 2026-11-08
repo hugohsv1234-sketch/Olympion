@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Chess } from 'chess.js';
-import { serverBotMove } from './engine.js';
-import { DEFAULT_POSITION, playUci, automaticResult } from '../src/lib/chess.js';
+import { serverBotMove } from './engine';
+import { DEFAULT_POSITION, playUci, automaticResult } from '../src/lib/chess';
 import type { Puzzle } from '../src/lib/types';
 const json = (body: unknown, status = 200) =>
   Response.json(body, {

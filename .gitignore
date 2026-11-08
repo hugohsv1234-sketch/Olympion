@@ -10,3 +10,4 @@ public/engine/*.wasm
 public/engine/stockfish*.js
 tmp/
 .vercel/
+/server/ranking.bundle.mjs
