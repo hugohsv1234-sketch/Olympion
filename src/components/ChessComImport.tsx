@@ -1,4 +1,5 @@
 'use client';
+import { useT, useLocale } from '@/lib/i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowDown,
@@ -20,7 +21,6 @@ import {
 } from '@/lib/chesscom';
 import type { AnalysisRecord } from '@/lib/types';
 import { useStore } from './Provider';
-
 const resultName = { win: 'Sieg', loss: 'Niederlage', draw: 'Remis' };
 export default function ChessComImport({
   onSelect,
@@ -31,6 +31,8 @@ export default function ChessComImport({
   analyzing: boolean;
   activeId?: string;
 }) {
+  const locale = useLocale();
+  const tr = useT();
   const { records } = useStore();
   const [username, setUsername] = useState('');
   const [account, setAccount] = useState<ChessComAccount | null>(null);
@@ -152,12 +154,13 @@ export default function ChessComImport({
           <Globe2 size={24} />
         </div>
         <div>
-          <span className="eyebrow">DEINE PARTIEN. DEIN FORTSCHRITT.</span>
-          <h2 id="chesscom-heading">Von Chess.com auf den Olymp.</h2>
-          <p>Name eingeben. Partie auswählen. Deine Entscheidungen verstehen.</p>
+          <span className="eyebrow">{tr('DEINE PARTIEN. DEIN FORTSCHRITT.')}</span>
+          <h2 id="chesscom-heading">{tr('Von Chess.com auf den Olymp.')}</h2>
+          <p>{tr('Name eingeben. Partie ausw\u00E4hlen. Deine Entscheidungen verstehen.')}</p>
         </div>
         <span className="integration-tag">
-          <span /> Ohne Passwort
+          <span />
+          {tr(' Ohne Passwort')}
         </span>
       </div>
       <form
@@ -173,23 +176,23 @@ export default function ChessComImport({
             id="chesscom-username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Dein Chess.com-Name"
+            placeholder={tr('Dein Chess.com-Name')}
             autoComplete="off"
             autoCapitalize="none"
             spellCheck={false}
             maxLength={50}
-            aria-label="Chess.com-Benutzername"
+            aria-label={tr('Chess.com-Benutzername')}
           />
         </label>
         <button className="button primary" disabled={busy || !username.trim()} type="submit">
           {busy ? <Loader2 className="spin" size={18} /> : <Swords size={18} />}
-          {busy ? 'Partien werden geladen' : 'Partien laden'} <ArrowRight size={17} />
+          {busy ? tr('Partien werden geladen') : tr('Partien laden')} <ArrowRight size={17} />
         </button>
         {busy && (
           <button
             type="button"
             className="icon-button"
-            aria-label="Chess.com-Anfrage abbrechen"
+            aria-label={tr('Chess.com-Anfrage abbrechen')}
             onClick={() => {
               controller.current?.abort();
               setBusy(false);
@@ -200,11 +203,13 @@ export default function ChessComImport({
         )}
       </form>
       <p className="import-caption">
-        Öffentliche, abgeschlossene Partien. Die Analyse rechnet mit Stockfish auf deinem Gerät.
+        {tr(
+          '\u00D6ffentliche, abgeschlossene Partien. Die Analyse rechnet mit Stockfish auf deinem Ger\u00E4t.',
+        )}
       </p>
       {error && (
         <p className="inline-error" role="alert">
-          {error}
+          {tr(error)}
         </p>
       )}
       {account && (
@@ -213,7 +218,7 @@ export default function ChessComImport({
             <div className="account-letter">{account.username[0].toUpperCase()}</div>
             <div className="account-name">
               <strong>{account.username}</strong>
-              <span>Chess.com · öffentliches Archiv</span>
+              <span>{tr('Chess.com \u00B7 \u00F6ffentliches Archiv')}</span>
             </div>
             <div className="chesscom-ratings">
               {account.ratings.map((r) => (
@@ -224,9 +229,9 @@ export default function ChessComImport({
               ))}
             </div>
             <label className="archive-month">
-              <span>Monat</span>
+              <span>{tr('Monat')}</span>
               <select
-                aria-label="Partienmonat"
+                aria-label={tr('Partienmonat')}
                 value={month}
                 disabled={busy || !account.archives.length}
                 onChange={(e) => {
@@ -234,10 +239,10 @@ export default function ChessComImport({
                   if (next) void changeMonth(next);
                 }}
               >
-                {!account.archives.length && <option value="">Kein Archiv</option>}
+                {!account.archives.length && <option value="">{tr('Kein Archiv')}</option>}
                 {account.archives.map((m) => (
                   <option key={m.key} value={m.key}>
-                    {new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' }).format(
+                    {new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(
                       new Date(m.year, m.month - 1, 1),
                     )}
                   </option>
@@ -249,88 +254,98 @@ export default function ChessComImport({
             <>
               <div className="archive-summary">
                 <span>
-                  <strong>{games.length}</strong> Partien im Monat
+                  <strong>{games.length}</strong>
+                  {tr(' Partien im Monat')}
                 </span>
                 <span>
-                  <strong>{wins}</strong> Siege
+                  <strong>{wins}</strong>
+                  {tr(' Siege')}
                 </span>
                 <span>
-                  <strong>{draws}</strong> Remis
+                  <strong>{draws}</strong>
+                  {tr(' Remis')}
                 </span>
                 <span>
-                  <strong>{games.length - wins - draws}</strong> Niederlagen
+                  <strong>{games.length - wins - draws}</strong>
+                  {tr(' Niederlagen')}
                 </span>
-                <div className="result-track" aria-label="Monatsbilanz">
+                <div className="result-track" aria-label={tr('Monatsbilanz')}>
                   <i style={{ width: (wins / games.length) * 100 + '%' }} />
                   <i style={{ width: (draws / games.length) * 100 + '%' }} />
                 </div>
               </div>
               <div className="archive-filters">
                 <label>
-                  <span className="sr-only">Bedenkzeit filtern</span>
+                  <span className="sr-only">{tr('Bedenkzeit filtern')}</span>
                   <select
                     value={timeFilter}
-                    aria-label="Bedenkzeit filtern"
+                    aria-label={tr('Bedenkzeit filtern')}
                     onChange={(e) => {
                       setTimeFilter(e.target.value);
                       setVisible(9);
                     }}
                   >
-                    <option value="all">Alle Bedenkzeiten</option>
-                    <option value="rapid">Rapid</option>
-                    <option value="blitz">Blitz</option>
-                    <option value="bullet">Bullet</option>
-                    <option value="daily">Daily</option>
+                    <option value="all">{tr('Alle Bedenkzeiten')}</option>
+                    <option value="rapid">{tr('Rapid')}</option>
+                    <option value="blitz">{tr('Blitz')}</option>
+                    <option value="bullet">{tr('Bullet')}</option>
+                    <option value="daily">{tr('Daily')}</option>
                   </select>
                 </label>
                 <label>
-                  <span className="sr-only">Ergebnis filtern</span>
+                  <span className="sr-only">{tr('Ergebnis filtern')}</span>
                   <select
                     value={resultFilter}
-                    aria-label="Ergebnis filtern"
+                    aria-label={tr('Ergebnis filtern')}
                     onChange={(e) => {
                       setResultFilter(e.target.value);
                       setVisible(9);
                     }}
                   >
-                    <option value="all">Alle Ergebnisse</option>
-                    <option value="win">Siege</option>
-                    <option value="loss">Niederlagen</option>
-                    <option value="draw">Remis</option>
+                    <option value="all">{tr('Alle Ergebnisse')}</option>
+                    <option value="win">{tr('Siege')}</option>
+                    <option value="loss">{tr('Niederlagen')}</option>
+                    <option value="draw">{tr('Remis')}</option>
                   </select>
                 </label>
                 <label className="opponent-search">
                   <Search size={15} />
                   <input
                     value={opponent}
-                    placeholder="Gegner suchen"
-                    aria-label="Gegner suchen"
+                    placeholder={tr('Gegner suchen')}
+                    aria-label={tr('Gegner suchen')}
                     onChange={(e) => {
                       setOpponent(e.target.value);
                       setVisible(9);
                     }}
                   />
                 </label>
-                <span>{filtered.length} Treffer</span>
+                <span>
+                  {filtered.length}
+                  {tr(' Treffer')}
+                </span>
               </div>
             </>
           )}
           {busy ? (
             <div className="archive-loading" role="status">
-              <Loader2 className="spin" size={24} /> Archiv wird geladen …
+              <Loader2 className="spin" size={24} />
+              {tr(' Archiv wird geladen \u2026')}
             </div>
           ) : !filtered.length ? (
             <div className="archive-empty">
               <Swords size={26} />
               <h3>
                 {games.length
-                  ? 'Kein Treffer für diese Filter.'
-                  : 'Noch keine Standardpartien in diesem Archiv.'}
+                  ? tr('Kein Treffer f\u00FCr diese Filter.')
+                  : tr('Noch keine Standardpartien in diesem Archiv.')}
               </h3>
               <p>
                 {games.length
-                  ? 'Wähle eine andere Bedenkzeit oder ein anderes Ergebnis.'
-                  : 'Wähle einen anderen Monat. Neue Partien können bei Chess.com zeitversetzt erscheinen.'}
+                  ? tr('W\u00E4hle eine andere Bedenkzeit oder ein anderes Ergebnis.')
+                  : tr(
+                      'W\u00E4hle einen anderen Monat. Neue Partien k\u00F6nnen bei Chess.com zeitversetzt erscheinen.',
+                    )}
               </p>
             </div>
           ) : (
@@ -352,7 +367,7 @@ export default function ChessComImport({
                   >
                     <div className="import-game-top">
                       <span className={'result-badge ' + source.result}>
-                        {resultName[source.result]}
+                        {tr(resultName[source.result])}
                       </span>
                       <span className="game-type">
                         <Clock3 size={13} /> {source.timeClass} ·{' '}
@@ -362,7 +377,11 @@ export default function ChessComImport({
                     <div className="import-opponent">
                       <span className={'side-indicator side-' + source.color} />
                       <div>
-                        <small>Du spielst {source.color === 'w' ? 'Weiß' : 'Schwarz'} gegen</small>
+                        <small>
+                          {tr('Du spielst ')}
+                          {source.color === 'w' ? tr('Wei\u00DF') : tr('Schwarz')}
+                          {tr(' gegen')}
+                        </small>
                         <strong>
                           {opponentName} <em>{opponentRating ?? '–'}</em>
                         </strong>
@@ -370,14 +389,15 @@ export default function ChessComImport({
                     </div>
                     <div className="import-game-meta">
                       <time dateTime={new Date(source.endedAt).toISOString()}>
-                        {new Date(source.endedAt).toLocaleDateString('de-DE', {
+                        {new Date(source.endedAt).toLocaleDateString(locale, {
                           day: '2-digit',
                           month: 'short',
                         })}
                       </time>
                       {done && (
                         <span>
-                          <Check size={13} /> Analyse gespeichert
+                          <Check size={13} />
+                          {tr(' Analyse gespeichert')}
                         </span>
                       )}
                     </div>
@@ -392,10 +412,10 @@ export default function ChessComImport({
                         <ArrowRight size={16} />
                       )}
                       {analyzing && activeId === game.id
-                        ? 'Analyse läuft'
+                        ? tr('Analyse l\u00E4uft')
                         : done
-                          ? 'Analyse öffnen'
-                          : 'Partie analysieren'}
+                          ? tr('Analyse \u00F6ffnen')
+                          : tr('Partie analysieren')}
                     </button>
                   </article>
                 );
@@ -404,13 +424,14 @@ export default function ChessComImport({
           )}
           {filtered.length > visible && !busy && (
             <button className="button secondary load-more" onClick={() => setVisible((n) => n + 9)}>
-              Weitere Partien <ArrowDown size={16} />
+              {tr('Weitere Partien ')}
+              <ArrowDown size={16} />
             </button>
           )}
         </div>
       )}
       <div className="chesscom-disclaimer">
-        OLYMPION ist ein unabhängiges Projekt und nicht mit Chess.com verbunden.
+        {tr('OLYMPION ist ein unabh\u00E4ngiges Projekt und nicht mit Chess.com verbunden.')}
       </div>
     </section>
   );

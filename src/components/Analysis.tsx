@@ -1,4 +1,5 @@
 'use client';
+import { useT, useLocale } from '@/lib/i18n';
 import { uuid } from '@/lib/id';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -47,6 +48,8 @@ interface Model extends Position {
   source?: ChessComSource;
 }
 export default function Analysis() {
+  const locale = useLocale();
+  const tr = useT();
   const { records, ready, put, settings } = useStore();
   const router = useRouter();
   const [model, setModel] = useState<Model | null>(null),
@@ -458,16 +461,19 @@ export default function Analysis() {
   return (
     <>
       <Heading
-        god="APOLLON · PARTIEANALYSE"
-        title="Verstehe, was möglich war."
-        description="Deine Partien. Echte Berechnung. Ein klarer Plan für den nächsten Zug."
+        god={tr('APOLLON \u00B7 PARTIEANALYSE')}
+        title={tr('Verstehe, was m\u00F6glich war.')}
+        description={tr(
+          'Deine Partien. Echte Berechnung. Ein klarer Plan f\u00FCr den n\u00E4chsten Zug.',
+        )}
       >
         <button className="button secondary" onClick={() => setSourceOpen((v) => !v)}>
-          <Globe2 size={16} /> Chess.com-Partien
+          <Globe2 size={16} />
+          {tr(' Chess.com-Partien')}
         </button>
         <button className="button secondary" onClick={() => setImportOpen(!importOpen)}>
           <Upload size={16} />
-          PGN oder FEN importieren
+          {tr('PGN oder FEN importieren')}
         </button>
       </Heading>
       {sourceOpen && (
@@ -476,14 +482,20 @@ export default function Analysis() {
       {importOpen && (
         <section className="panel import-panel">
           <div>
-            <h2>Deine Partie auf dem Brett.</h2>
-            <p>Füge eine PGN oder einzelne FEN-Stellung ein. Maximal 200 KB und 500 Halbzüge.</p>
+            <h2>{tr('Deine Partie auf dem Brett.')}</h2>
+            <p>
+              {tr(
+                'F\u00FCge eine PGN oder einzelne FEN-Stellung ein. Maximal 200 KB und 500 Halbz\u00FCge.',
+              )}
+            </p>
             <label className="field">
-              Notation
+              {tr('Notation')}
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={'1. e4 e5 2. Sf3 …\n(PGN verwendet englische Figurennamen: Nf3)'}
+                placeholder={tr(
+                  '1. e4 e5 2. Sf3 \u2026\n(PGN verwendet englische Figurennamen: Nf3)',
+                )}
                 rows={4}
                 maxLength={200000}
               />
@@ -494,11 +506,12 @@ export default function Analysis() {
                 onClick={() => importText(input)}
                 disabled={!input.trim()}
               >
-                Auf dem Brett öffnen <ArrowRight size={17} />
+                {tr('Auf dem Brett \u00F6ffnen ')}
+                <ArrowRight size={17} />
               </button>
               <label className="button secondary file-button">
                 <Upload size={16} />
-                PGN-Datei
+                {tr('PGN-Datei')}
                 <input
                   type="file"
                   accept=".pgn,.txt"
@@ -520,7 +533,7 @@ export default function Analysis() {
             </div>
           </div>
           <div className="saved-games">
-            <span className="eyebrow">DEINE GESPEICHERTEN PARTIEN</span>
+            <span className="eyebrow">{tr('DEINE GESPEICHERTEN PARTIEN')}</span>
             {games.length ? (
               games.slice(0, 8).map((g) => (
                 <button
@@ -529,9 +542,13 @@ export default function Analysis() {
                   onClick={() => load({ ...g, name: 'Arena · Stufe ' + g.level })}
                 >
                   <span>
-                    {new Date(g.createdAt).toLocaleDateString('de-DE')} · Bot {g.level}
+                    {new Date(g.createdAt).toLocaleDateString(locale)}
+                    {tr(' \u00B7 Bot ')}
+                    {g.level}
                     <small>
-                      {g.moves.length} Halbzüge · {g.result || 'Laufende Partie'}
+                      {g.moves.length}
+                      {tr(' Halbz\u00FCge \u00B7 ')}
+                      {g.result || 'Laufende Partie'}
                     </small>
                   </span>
                   <ArrowRight size={16} />
@@ -539,8 +556,9 @@ export default function Analysis() {
               ))
             ) : (
               <p>
-                Noch keine gespeicherten Partien. Spiele eine Botpartie oder importiere deine
-                eigene.
+                {tr(
+                  'Noch keine gespeicherten Partien. Spiele eine Botpartie oder importiere deine eigene.',
+                )}
               </p>
             )}
             <button
@@ -549,11 +567,11 @@ export default function Analysis() {
                 importText('1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Nxd5 6. Nxf7 Kxf7')
               }
             >
-              Legale Beispielpartie laden
+              {tr('Legale Beispielpartie laden')}
             </button>
             {savedAnalyses.length > 0 && (
               <>
-                <span className="eyebrow">GESPEICHERTE ANALYSEN</span>
+                <span className="eyebrow">{tr('GESPEICHERTE ANALYSEN')}</span>
                 {savedAnalyses.slice(0, 5).map((item) => {
                   const a = item.value as AnalysisRecord;
                   return (
@@ -574,10 +592,11 @@ export default function Analysis() {
                       }
                     >
                       <span>
-                        {new Date(a.updatedAt).toLocaleDateString('de-DE')}
+                        {new Date(a.updatedAt).toLocaleDateString(locale)}
                         <small>
-                          {a.results.length} / {a.moves.length} Halbzüge ·{' '}
-                          {a.budget.toLocaleString('de-DE')} Knoten
+                          {a.results.length} / {a.moves.length}
+                          {tr(' Halbz\u00FCge \u00B7')} {a.budget.toLocaleString(locale)}
+                          {tr(' Knoten')}
                         </small>
                       </span>
                       <ArrowRight size={16} />
@@ -589,19 +608,21 @@ export default function Analysis() {
           </div>
         </section>
       )}
-      {error && <ErrorText>{error}</ErrorText>}
+      {error && <ErrorText>{tr(error)}</ErrorText>}
       {model ? (
         <div ref={root} className={'analysis-workspace ' + (fullscreen ? 'is-fullscreen' : '')}>
           <div className="analysis-toolbar">
             <div>
               <span className="eyebrow">{model.name}</span>
               <small>
-                {variation.length ? 'Freie Variante' : `${cursor} / ${model.moves.length} Halbzüge`}
+                {variation.length
+                  ? tr('Freie Variante')
+                  : `${cursor} / ${model.moves.length} Halbzüge`}
               </small>
             </div>
             <div className="button-row">
               <label className="sr-only" htmlFor="analysis-intensity">
-                Analyseintensität
+                {tr('Analyseintensit\u00E4t')}
               </label>
               <select
                 id="analysis-intensity"
@@ -617,7 +638,7 @@ export default function Analysis() {
               <button
                 className="icon-button"
                 onClick={() => void full()}
-                aria-label={fullscreen ? 'Vollbild verlassen' : 'Vollbild öffnen'}
+                aria-label={fullscreen ? tr('Vollbild verlassen') : tr('Vollbild \u00F6ffnen')}
               >
                 {fullscreen ? <Minimize2 size={19} /> : <Maximize2 size={19} />}
               </button>
@@ -627,16 +648,17 @@ export default function Analysis() {
             <div className="analysis-player-strip">
               <div className="player-monogram">{model.source.username[0].toUpperCase()}</div>
               <div>
-                <span className="eyebrow">DEINE CHESS.COM-PARTIE</span>
+                <span className="eyebrow">{tr('DEINE CHESS.COM-PARTIE')}</span>
                 <strong>{model.source.username}</strong>
                 <small>
-                  Du spielst {model.source.color === 'w' ? 'Weiß' : 'Schwarz'} ·{' '}
+                  {tr('Du spielst ')}
+                  {model.source.color === 'w' ? tr('Wei\u00DF') : tr('Schwarz')} ·{' '}
                   {model.source.timeClass} ·{' '}
-                  {new Date(model.source.endedAt).toLocaleDateString('de-DE')}
+                  {new Date(model.source.endedAt).toLocaleDateString(locale)}
                 </small>
               </div>
               <div className="player-quality">
-                <small>Deine Zugqualität</small>
+                <small>{tr('Deine Zugqualit\u00E4t')}</small>
                 <strong>
                   {(() => {
                     const own = results.filter((r) => colorFor(r.ply) === model.source!.color);
@@ -645,14 +667,17 @@ export default function Analysis() {
                       : '–';
                   })()}
                 </strong>
-                <small>OLYMPION · berechnete Züge</small>
+                <small>{tr('OLYMPION \u00B7 berechnete Z\u00FCge')}</small>
               </div>
             </div>
           )}
           <div className="play-layout analysis-layout">
             <div className="board-column">
               <div className="evaluation-board">
-                <div className="evaluation-bar" aria-label="Bewertungsleiste aus Weißperspektive">
+                <div
+                  className="evaluation-bar"
+                  aria-label={tr('Bewertungsleiste aus Wei\u00DFperspektive')}
+                >
                   <span className="eval-black" />
                   <span className="eval-white" style={{ height: bar + '%' }} />
                   <small>
@@ -678,7 +703,7 @@ export default function Analysis() {
               <div className="analysis-nav">
                 <button
                   className="icon-button"
-                  aria-label="Zur Anfangsstellung"
+                  aria-label={tr('Zur Anfangsstellung')}
                   onClick={() => navigate(0)}
                   disabled={cursor === 0 && !variation.length}
                 >
@@ -686,7 +711,7 @@ export default function Analysis() {
                 </button>
                 <button
                   className="icon-button"
-                  aria-label="Einen Halbzug zurück"
+                  aria-label={tr('Einen Halbzug zur\u00FCck')}
                   onClick={() => navigate(cursor - 1)}
                   disabled={cursor === 0 && !variation.length}
                 >
@@ -694,7 +719,9 @@ export default function Analysis() {
                 </button>
                 <button
                   className="icon-button playback-button"
-                  aria-label={autoplay ? 'Wiedergabe pausieren' : 'Partie automatisch abspielen'}
+                  aria-label={
+                    autoplay ? tr('Wiedergabe pausieren') : tr('Partie automatisch abspielen')
+                  }
                   disabled={!model.moves.length}
                   aria-pressed={autoplay}
                   onClick={() => {
@@ -709,7 +736,7 @@ export default function Analysis() {
                 </span>
                 <button
                   className="icon-button"
-                  aria-label="Einen Halbzug vor"
+                  aria-label={tr('Einen Halbzug vor')}
                   onClick={() => navigate(cursor + 1)}
                   disabled={cursor === model.moves.length && !variation.length}
                 >
@@ -717,16 +744,16 @@ export default function Analysis() {
                 </button>
                 <button
                   className="icon-button"
-                  aria-label="Zur Schlussstellung"
+                  aria-label={tr('Zur Schlussstellung')}
                   onClick={() => navigate(model.moves.length)}
                   disabled={cursor === model.moves.length && !variation.length}
                 >
                   <ChevronsRight size={21} />
                 </button>
                 <label className="playback-speed">
-                  <span className="sr-only">Wiedergabegeschwindigkeit</span>
+                  <span className="sr-only">{tr('Wiedergabegeschwindigkeit')}</span>
                   <select
-                    aria-label="Wiedergabegeschwindigkeit"
+                    aria-label={tr('Wiedergabegeschwindigkeit')}
                     value={speed}
                     onChange={(e) => setSpeed(Number(e.target.value))}
                   >
@@ -738,7 +765,7 @@ export default function Analysis() {
                 <div className="nav-divider" />
                 <button
                   className="icon-button"
-                  aria-label="Brett drehen"
+                  aria-label={tr('Brett drehen')}
                   onClick={() => setOrientation((o) => (o === 'w' ? 'b' : 'w'))}
                 >
                   <FlipVertical2 size={18} />
@@ -747,7 +774,7 @@ export default function Analysis() {
               {variation.length > 0 && (
                 <div className="variation-note">
                   <span>
-                    Variante:{' '}
+                    {tr('Variante:')}{' '}
                     {notation(
                       { initialFen: model.initialFen, moves: model.moves.slice(0, cursor) },
                       variation,
@@ -760,7 +787,7 @@ export default function Analysis() {
                       setPositionEval(null);
                     }}
                   >
-                    Zur Hauptpartie
+                    {tr('Zur Hauptpartie')}
                   </button>
                 </div>
               )}
@@ -771,31 +798,37 @@ export default function Analysis() {
                 onSelect={navigate}
               />
               <div className="board-caption">
-                <span>Bewertung immer aus Sicht von Weiß</span>
-                <span>← → für Zugnavigation</span>
+                <span>{tr('Bewertung immer aus Sicht von Wei\u00DF')}</span>
+                <span>{tr('\u2190 \u2192 f\u00FCr Zugnavigation')}</span>
               </div>
               {!model.moves.length && (
                 <p className="small-text">
-                  FEN-Stellung: Frühere Züge sind unbekannt. Wiederholungsansprüche können daraus
-                  nicht rekonstruiert werden.
+                  {tr(
+                    'FEN-Stellung: Fr\u00FChere Z\u00FCge sind unbekannt. Wiederholungsanspr\u00FCche k\u00F6nnen daraus nicht rekonstruiert werden.',
+                  )}
                 </p>
               )}
             </div>
             <aside className="play-panel">
               <section className="panel">
                 <div className="panel-top">
-                  <h2>Computeranalyse</h2>
-                  <span className="tag">STOCKFISH 19</span>
+                  <h2>{tr('Computeranalyse')}</h2>
+                  <span className="tag">{tr('STOCKFISH 19')}</span>
                 </div>
                 <div className="analysis-coverage">
                   <strong>
-                    {results.length} <span>/ {model.moves.length} Halbzüge</span>
+                    {results.length}{' '}
+                    <span>
+                      / {model.moves.length}
+                      {tr(' Halbz\u00FCge')}
+                    </span>
                   </strong>
                   <small>
-                    {budget.toLocaleString('de-DE')} Knoten pro Suche ·{' '}
+                    {budget.toLocaleString(locale)}
+                    {tr(' Knoten pro Suche \u00B7')}{' '}
                     {results.length === model.moves.length && model.moves.length
-                      ? 'vollständig'
-                      : 'Teilabdeckung'}
+                      ? tr('vollst\u00E4ndig')
+                      : tr('Teilabdeckung')}
                   </small>
                 </div>
                 <div className="progress-track">
@@ -822,18 +855,18 @@ export default function Analysis() {
                   {busy ? (
                     <>
                       <Square size={14} />
-                      Analyse abbrechen
+                      {tr('Analyse abbrechen')}
                     </>
                   ) : (
                     <>
                       <Focus size={17} />
                       {!model.moves.length
-                        ? 'Stellung analysieren'
+                        ? tr('Stellung analysieren')
                         : results.length === model.moves.length
-                          ? 'Analyse abgeschlossen'
+                          ? tr('Analyse abgeschlossen')
                           : results.length
-                            ? 'Analyse fortsetzen'
-                            : 'Partie analysieren'}
+                            ? tr('Analyse fortsetzen')
+                            : tr('Partie analysieren')}
                     </>
                   )}
                 </button>
@@ -842,14 +875,20 @@ export default function Analysis() {
                   disabled={busy || Boolean(automaticTerminal(chess))}
                   onClick={() => void currentAnalysis()}
                 >
-                  Aktuelle Stellung berechnen
+                  {tr('Aktuelle Stellung berechnen')}
                 </button>
-                {busy && <Loading text="Analyse läuft …" />}
+                {busy && <Loading text={tr('Analyse l\u00E4uft \u2026')} />}
                 {currentScore && (
                   <div className="position-result">
                     <strong>{scoreText(currentScore, true, chess.turn())}</strong>
-                    <p>Bestzug: {sanOf(position, positionEval!.bestMove)}</p>
-                    <small>Tiefe {positionEval!.lines[0].depth}</small>
+                    <p>
+                      {tr('Bestzug: ')}
+                      {sanOf(position, positionEval!.bestMove)}
+                    </p>
+                    <small>
+                      {tr('Tiefe ')}
+                      {positionEval!.lines[0].depth}
+                    </small>
                     <p className="variation-notation">
                       {notation(position, positionEval!.lines[0].pv.slice(0, 8))}
                     </p>
@@ -861,7 +900,7 @@ export default function Analysis() {
                     checked={arrows}
                     onChange={(e) => setArrows(e.target.checked)}
                   />
-                  Bestzugpfeil in aktueller Stellung
+                  {tr('Bestzugpfeil in aktueller Stellung')}
                 </label>
               </section>
               {results.length > 0 && (
@@ -870,28 +909,32 @@ export default function Analysis() {
                     const rs = results.filter((r) => colorFor(r.ply) === color);
                     return (
                       <div key={color}>
-                        <span>{color === 'w' ? 'Weiß' : 'Schwarz'}</span>
+                        <span>{color === 'w' ? tr('Wei\u00DF') : tr('Schwarz')}</span>
                         <strong>
                           {rs.length
                             ? (rs.reduce((s, r) => s + r.quality, 0) / rs.length).toFixed(1) + ' %'
                             : '–'}
                         </strong>
-                        <small>{rs.length} analysierte Züge</small>
+                        <small>
+                          {rs.length}
+                          {tr(' analysierte Z\u00FCge')}
+                        </small>
                       </div>
                     );
                   })}
                   <p>
-                    Arithmetischer Mittelwert der OLYMPION-Zugqualität der jeweils analysierten
-                    Züge.
+                    {tr(
+                      'Arithmetischer Mittelwert der OLYMPION-Zugqualit\u00E4t der jeweils analysierten Z\u00FCge.',
+                    )}
                   </p>
                 </section>
               )}
               <section className="panel analysis-notes">
                 <div className="panel-top">
-                  <h2>Dein Lehrbuch</h2>
+                  <h2>{tr('Dein Lehrbuch')}</h2>
                   <button
                     className="icon-button"
-                    aria-label="Analyse als Favorit markieren"
+                    aria-label={tr('Analyse als Favorit markieren')}
                     disabled={busy}
                     aria-pressed={Boolean(
                       (
@@ -922,7 +965,7 @@ export default function Analysis() {
                   </button>
                 </div>
                 <label className="field">
-                  Deine Erkenntnis
+                  {tr('Deine Erkenntnis')}
                   <textarea
                     rows={3}
                     maxLength={1000}
@@ -932,20 +975,22 @@ export default function Analysis() {
                       setNote(e.target.value);
                       setNoteSaved(false);
                     }}
-                    placeholder="Was möchtest du in der nächsten Partie besser machen?"
+                    placeholder={tr(
+                      'Was m\u00F6chtest du in der n\u00E4chsten Partie besser machen?',
+                    )}
                   />
                 </label>
                 <button className="text-button" disabled={busy} onClick={() => void saveMetadata()}>
-                  <Save size={15} /> {noteSaved ? 'Gespeichert' : 'Notiz speichern'}
+                  <Save size={15} /> {noteSaved ? tr('Gespeichert') : tr('Notiz speichern')}
                 </button>
-                <small>Favoriten und Notizen bleiben in deinem Analyse-Archiv.</small>
+                <small>{tr('Favoriten und Notizen bleiben in deinem Analyse-Archiv.')}</small>
               </section>
               <section className="panel move-panel">
                 <div className="panel-top">
-                  <h2>Zugfolge</h2>
+                  <h2>{tr('Zugfolge')}</h2>
                   <button
                     className="icon-button"
-                    aria-label="PGN der Hauptpartie exportieren"
+                    aria-label={tr('PGN der Hauptpartie exportieren')}
                     onClick={() =>
                       download(
                         'olympion-analyse.pgn',
@@ -989,13 +1034,14 @@ export default function Analysis() {
                 <section className="panel">
                   <QualityCard result={selected} />
                   <button className="button secondary full" onClick={() => void practice()}>
-                    Diesen Moment üben <ArrowRight size={16} />
+                    {tr('Diesen Moment \u00FCben ')}
+                    <ArrowRight size={16} />
                   </button>
                 </section>
               )}
               {results.some((r) => r.quality < 80) && (
                 <section className="panel">
-                  <h2>Wendepunkte</h2>
+                  <h2>{tr('Wendepunkte')}</h2>
                   {results
                     .filter((r) => r.quality < 80)
                     .sort((a, b) => a.quality - b.quality)
@@ -1007,7 +1053,7 @@ export default function Analysis() {
                         onClick={() => navigate(r.ply + 1)}
                       >
                         <span>
-                          {r.san} · {r.label}
+                          {r.san} · {tr(r.label)}
                         </span>
                         <strong>{Math.round(r.quality)} %</strong>
                       </button>
@@ -1018,9 +1064,10 @@ export default function Analysis() {
           </div>
         </div>
       ) : (
-        <Empty title="Gib deiner Partie eine zweite Perspektive.">
-          Importiere eine PGN, eine FEN oder öffne eine gespeicherte Partie. Bewertungszahlen
-          erscheinen erst nach echter Engineberechnung.
+        <Empty title={tr('Gib deiner Partie eine zweite Perspektive.')}>
+          {tr(
+            'Importiere eine PGN, eine FEN oder \u00F6ffne eine gespeicherte Partie. Bewertungszahlen erscheinen erst nach echter Engineberechnung.',
+          )}
         </Empty>
       )}
       <AnalysisLibrary busy={busy} onOpen={openSaved} />
@@ -1041,10 +1088,11 @@ function EvaluationGraph({
   cursor: number;
   onSelect: (i: number) => void;
 }) {
+  const tr = useT();
   if (!results.length)
     return (
       <div className="eval-graph empty-graph">
-        Hier entsteht nach der Analyse dein Bewertungsverlauf.
+        {tr('Hier entsteht nach der Analyse dein Bewertungsverlauf.')}
       </div>
     );
   const y = (r: MoveQuality) =>
@@ -1058,7 +1106,7 @@ function EvaluationGraph({
     .join(' ');
   return (
     <div className="eval-graph">
-      <svg viewBox="0 0 600 120" aria-label="Bewertungsverlauf aus Weißperspektive">
+      <svg viewBox="0 0 600 120" aria-label={tr('Bewertungsverlauf aus Wei\u00DFperspektive')}>
         <path d="M0 60H600" stroke="#515154" strokeDasharray="3 4" />
         <path d={path} fill="none" stroke="#e4e4e1" strokeWidth="1.5" />
         <path

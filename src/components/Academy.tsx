@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/lib/i18n';
 import { useEffect, useRef, useState } from 'react';
 import { Check, ChevronRight, GraduationCap, Lightbulb, Play, RotateCcw } from 'lucide-react';
 import { Chess } from 'chess.js';
@@ -10,6 +11,7 @@ import { ErrorText, Heading, Loading, Portrait } from './Common';
 import Chessboard from './Chessboard';
 import { LESSONS, type Lesson } from '@/lib/lessons';
 export default function Academy() {
+  const tr = useT();
   const { records, put, ready } = useStore();
   const [selected, setSelected] = useState<Lesson>(LESSONS[0]),
     [fen, setFen] = useState(DEFAULT_POSITION),
@@ -110,9 +112,9 @@ export default function Academy() {
   return (
     <>
       <Heading
-        god="ATHENE · DIE AKADEMIE"
-        title="Aus Wissen wird Können."
-        description="Kurze Lektionen. Echte Brettübungen. Ein klarer Lernweg."
+        god={tr('ATHENE \u00B7 DIE AKADEMIE')}
+        title={tr('Aus Wissen wird K\u00F6nnen.')}
+        description={tr('Kurze Lektionen. Echte Brett\u00FCbungen. Ein klarer Lernweg.')}
       />
       <div className="academy-layout">
         <aside className="lesson-nav">
@@ -122,12 +124,12 @@ export default function Academy() {
               <strong>
                 {completed.size} / {LESSONS.length}
               </strong>
-              <small>Lektionen abgeschlossen</small>
+              <small>{tr('Lektionen abgeschlossen')}</small>
             </span>
           </div>
           {[...new Set(LESSONS.map((l) => l.group))].map((group) => (
             <div key={group}>
-              <span className="eyebrow">{group}</span>
+              <span className="eyebrow">{tr(group)}</span>
               {LESSONS.filter((l) => l.group === group).map((l, i) => (
                 <button
                   className={'lesson-item ' + (selected.id === l.id ? 'active' : '')}
@@ -138,8 +140,11 @@ export default function Academy() {
                     {completed.has(l.id) ? <Check size={16} /> : String(i + 1).padStart(2, '0')}
                   </span>
                   <span>
-                    {l.title}
-                    <small>{l.minutes} Minuten</small>
+                    {tr(l.title)}
+                    <small>
+                      {l.minutes}
+                      {tr(' Minuten')}
+                    </small>
                   </span>
                   <ChevronRight size={15} />
                 </button>
@@ -155,15 +160,15 @@ export default function Academy() {
               }
             />
             <div>
-              <span className="eyebrow">{selected.group}</span>
-              <h2>{selected.title}</h2>
-              <p>{selected.text}</p>
+              <span className="eyebrow">{tr(selected.group)}</span>
+              <h2>{tr(selected.title)}</h2>
+              <p>{tr(selected.text)}</p>
             </div>
           </div>
           <div className="lesson-exercise">
             <div className="lesson-board">
               {loading ? (
-                <Loading text="Brettübung wird vorbereitet …" />
+                <Loading text={tr('Brett\u00FCbung wird vorbereitet \u2026')} />
               ) : (
                 <Chessboard
                   fen={fen}
@@ -175,23 +180,23 @@ export default function Academy() {
               )}
             </div>
             <section className="panel lesson-task">
-              <span className="eyebrow">DEINE AUFGABE</span>
-              <h3>{selected.goal}</h3>
-              <p>Setze deine Idee direkt auf dem Brett um.</p>
+              <span className="eyebrow">{tr('DEINE AUFGABE')}</span>
+              <h3>{tr(selected.goal)}</h3>
+              <p>{tr('Setze deine Idee direkt auf dem Brett um.')}</p>
               {feedback && (
                 <div className="puzzle-feedback" role="status">
                   {done && <Check size={18} />}
-                  <p>{feedback}</p>
+                  <p>{tr(feedback)}</p>
                 </div>
               )}
-              {error && <ErrorText>{error}</ErrorText>}
+              {error && <ErrorText>{tr(error)}</ErrorText>}
               <button
                 className="button secondary full"
                 disabled={done || loading}
                 onClick={() => setHint(true)}
               >
                 <Lightbulb size={16} />
-                Einen Zughinweis anzeigen
+                {tr('Einen Zughinweis anzeigen')}
               </button>
               {hint && (
                 <p className="solution-notation">
@@ -211,12 +216,13 @@ export default function Academy() {
                     )
                   }
                 >
-                  Nächste Lektion <Play size={16} />
+                  {tr('N\u00E4chste Lektion ')}
+                  <Play size={16} />
                 </button>
               )}
               <button className="text-button" onClick={() => void start(selected)}>
                 <RotateCcw size={15} />
-                Übung wiederholen
+                {tr('\u00DCbung wiederholen')}
               </button>
             </section>
           </div>

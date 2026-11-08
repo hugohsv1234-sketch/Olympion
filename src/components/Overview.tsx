@@ -1,4 +1,5 @@
 'use client';
+import { useT, useLocale } from '@/lib/i18n';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -31,7 +32,13 @@ export function useStats() {
     lessons = records.filter((r) => r.kind === 'lesson').map((r) => r.value as LessonResult);
   const sessions = records
     .filter((r) => r.kind === 'session')
-    .map((r) => r.value as { at: number; seconds: number });
+    .map(
+      (r) =>
+        r.value as {
+          at: number;
+          seconds: number;
+        },
+    );
   const seconds = sessions.reduce((s, r) => s + r.seconds, 0),
     today = sessions
       .filter((s) => localDay(s.at) === localDay())
@@ -65,6 +72,8 @@ export function useStats() {
   };
 }
 export function Home() {
+  const locale = useLocale();
+  const tr = useT();
   const { settings, records, ready } = useStore();
   const router = useRouter();
   const [name, setName] = useState('');
@@ -118,12 +127,22 @@ export function Home() {
           records.some(
             (r) =>
               r.kind === 'session' &&
-              (r.value as { seconds: number }).seconds > 0 &&
-              localDay((r.value as { at: number }).at) === day,
+              (
+                r.value as {
+                  seconds: number;
+                }
+              ).seconds > 0 &&
+              localDay(
+                (
+                  r.value as {
+                    at: number;
+                  }
+                ).at,
+              ) === day,
           );
         return {
           key: day,
-          label: date.toLocaleDateString('de-DE', { weekday: 'narrow' }),
+          label: date.toLocaleDateString(locale, { weekday: 'narrow' }),
           day: date.getDate(),
           active,
         };
@@ -134,18 +153,19 @@ export function Home() {
     <>
       <div className="olymp-welcome">
         <div>
-          <span className="live-indicator" /> DEIN PLATZ AUF DEM OLYMP
+          <span className="live-indicator" />
+          {tr(' DEIN PLATZ AUF DEM OLYMP')}
         </div>
         <span>
           {settings.name === 'Gast'
-            ? 'Deine nächste gute Entscheidung beginnt hier.'
+            ? tr('Deine n\u00E4chste gute Entscheidung beginnt hier.')
             : 'Willkommen zurück, ' + settings.name + '.'}
         </span>
       </div>
       <section className="olymp-hero">
         <img
           src="/images/athena.webp"
-          alt="Athene aus Marmor vor einem antiken griechischen Tempel"
+          alt={tr('Athene aus Marmor vor einem antiken griechischen Tempel')}
           width={1672}
           height={941}
           fetchPriority="high"
@@ -154,37 +174,39 @@ export function Home() {
         <div className="olymp-hero-content">
           <div className="hero-seal">
             <Columns3 size={16} />
-            <span>GEFORMT DURCH STRATEGIE</span>
+            <span>{tr('GEFORMT DURCH STRATEGIE')}</span>
           </div>
           <h1>
-            Dein Zug.
+            {tr('Dein Zug.')}
             <br />
-            <em>Dein Olymp.</em>
+            <em>{tr('Dein Olymp.')}</em>
           </h1>
           <p>
-            Sieh mehr als den nächsten Zug.
+            {tr('Sieh mehr als den n\u00E4chsten Zug.')}
             <br />
-            Trainiere mit Athene. Spiele gegen die Götter.
-            <br className="desktop-only" /> Lerne aus deinen eigenen Partien.
+            {tr('Trainiere mit Athene. Spiele gegen die G\u00F6tter.')}
+            <br className="desktop-only" />
+            {tr(' Lerne aus deinen eigenen Partien.')}
           </p>
           <div className="hero-actions">
-            <ActionLink href="/training">Jetzt besser werden</ActionLink>
+            <ActionLink href="/training">{tr('Jetzt besser werden')}</ActionLink>
             <Link className="hero-secondary" href="/arena">
-              Betritt die Arena <Swords size={17} />
+              {tr('Betritt die Arena ')}
+              <Swords size={17} />
             </Link>
           </div>
         </div>
         <div className="hero-god-label">
-          <span>01 / ATHENE</span>
+          <span>{tr('01 / ATHENE')}</span>
           <strong>
-            Weisheit ist
+            {tr('Weisheit ist')}
             <br />
-            dein stärkster Zug.
+            {tr('dein st\u00E4rkster Zug.')}
           </strong>
           <span className="god-rule" />
         </div>
         <div className="hero-coordinate" aria-hidden="true">
-          ΑΘΗΝΑ · STRATEGIE & WEISHEIT
+          {tr('\u0391\u0398\u0397\u039D\u0391 \u00B7 STRATEGIE & WEISHEIT')}
         </div>
       </section>
       <div className="home-stats-grid">
@@ -216,11 +238,11 @@ export function Home() {
         ].map((stat) => (
           <Link href="/fortschritt" className="home-stat" key={stat.label}>
             <div>
-              <span>{stat.label}</span>
+              <span>{tr(stat.label)}</span>
               <stat.icon size={17} />
             </div>
             <strong>{stat.value}</strong>
-            <small>{stat.note}</small>
+            <small>{tr(stat.note)}</small>
           </Link>
         ))}
       </div>
@@ -229,9 +251,9 @@ export function Home() {
           <Globe2 size={27} />
         </div>
         <div className="launch-copy">
-          <span className="eyebrow">NEU · DEINE PARTIEN IM FOKUS</span>
-          <h2>Dein Chess.com-Name genügt.</h2>
-          <p>Entdecke deine Wendepunkte. Entwickle deinen eigenen Spielstil.</p>
+          <span className="eyebrow">{tr('NEU \u00B7 DEINE PARTIEN IM FOKUS')}</span>
+          <h2>{tr('Dein Chess.com-Name gen\u00FCgt.')}</h2>
+          <p>{tr('Entdecke deine Wendepunkte. Entwickle deinen eigenen Spielstil.')}</p>
         </div>
         <form
           onSubmit={(e) => {
@@ -245,7 +267,7 @@ export function Home() {
           }}
         >
           <label className="sr-only" htmlFor="home-chesscom">
-            Dein Chess.com-Name
+            {tr('Dein Chess.com-Name')}
           </label>
           <div className="launch-field">
             <input
@@ -254,17 +276,21 @@ export function Home() {
               maxLength={50}
               autoCapitalize="none"
               spellCheck={false}
-              placeholder="Dein Chess.com-Name"
+              placeholder={tr('Dein Chess.com-Name')}
               onChange={(e) => setName(e.target.value)}
             />
-            <button type="submit" aria-label="Chess.com-Partien laden" disabled={!name.trim()}>
+            <button
+              type="submit"
+              aria-label={tr('Chess.com-Partien laden')}
+              disabled={!name.trim()}
+            >
               <ArrowRight size={21} />
             </button>
           </div>
-          <small>Ohne Passwort. Echte Stockfish-Analyse.</small>
+          <small>{tr('Ohne Passwort. Echte Stockfish-Analyse.')}</small>
           {error && (
             <span className="inline-error" role="alert">
-              {error}
+              {tr(error)}
             </span>
           )}
         </form>
@@ -273,8 +299,8 @@ export function Home() {
         <section className="mission-board">
           <div className="section-title">
             <div>
-              <span className="eyebrow">KLEINE SCHRITTE. GROSSE WIRKUNG.</span>
-              <h2>Deine Missionen für heute.</h2>
+              <span className="eyebrow">{tr('KLEINE SCHRITTE. GROSSE WIRKUNG.')}</span>
+              <h2>{tr('Deine Missionen f\u00FCr heute.')}</h2>
             </div>
             <span className="mission-count">{missions.filter((m) => m.done).length} / 3</span>
           </div>
@@ -289,12 +315,15 @@ export function Home() {
                   {mission.done ? <Check size={21} /> : <mission.icon size={21} />}
                 </span>
                 <div>
-                  <small>MISSION 0{i + 1}</small>
-                  <h3>{mission.title}</h3>
-                  <p>{mission.text}</p>
+                  <small>
+                    {tr('MISSION 0')}
+                    {i + 1}
+                  </small>
+                  <h3>{tr(mission.title)}</h3>
+                  <p>{tr(mission.text)}</p>
                 </div>
                 <span className="mission-state">
-                  {mission.progress}
+                  {tr(mission.progress)}
                   <ArrowUpRight size={17} />
                 </span>
               </Link>
@@ -302,8 +331,8 @@ export function Home() {
           </div>
         </section>
         <section className="weekly-board">
-          <span className="eyebrow">DEIN RHYTHMUS</span>
-          <h2>Jeder Tag ein Schritt.</h2>
+          <span className="eyebrow">{tr('DEIN RHYTHMUS')}</span>
+          <h2>{tr('Jeder Tag ein Schritt.')}</h2>
           <div
             className="goal-orbit"
             style={{ background: 'conic-gradient(#e7e9e9 ' + progress + '%, #24292d 0)' }}
@@ -313,35 +342,43 @@ export function Home() {
             <div>
               <strong>
                 {Math.floor(s.today / 60)}
-                <small>MIN.</small>
+                <small>{tr('MIN.')}</small>
               </strong>
-              <span>von {settings.goal} heute</span>
+              <span>
+                {tr('von ')}
+                {settings.goal}
+                {tr(' heute')}
+              </span>
             </div>
           </div>
-          <div className="week-days" aria-label="Deine letzten sieben Trainingstage">
+          <div className="week-days" aria-label={tr('Deine letzten sieben Trainingstage')}>
             {days.map((day) => (
               <div
                 className={'week-day ' + (day.active ? 'active' : '')}
                 key={day.key}
                 title={day.key + (day.active ? ' · trainiert' : ' · kein Training')}
               >
-                <span>{day.label}</span>
+                <span>{tr(day.label)}</span>
                 <strong>{day.active ? <Check size={15} /> : day.day}</strong>
               </div>
             ))}
           </div>
-          <p>{days.filter((d) => d.active).length} aktive Tage in den letzten 7 Tagen.</p>
+          <p>
+            {days.filter((d) => d.active).length}
+            {tr(' aktive Tage in den letzten 7 Tagen.')}
+          </p>
           <Link href="/training" className="text-button">
-            Deinen Trainingsplan öffnen <ArrowRight size={15} />
+            {tr('Deinen Trainingsplan \u00F6ffnen ')}
+            <ArrowRight size={15} />
           </Link>
         </section>
       </div>
       <div className="section-title mode-heading">
         <div>
-          <span className="eyebrow">WÄHLE DEINE HERAUSFORDERUNG</span>
-          <h2>Was ist dein nächster Zug?</h2>
+          <span className="eyebrow">{tr('W\u00C4HLE DEINE HERAUSFORDERUNG')}</span>
+          <h2>{tr('Was ist dein n\u00E4chster Zug?')}</h2>
         </div>
-        <span>Ein Olymp. Viele Wege nach oben.</span>
+        <span>{tr('Ein Olymp. Viele Wege nach oben.')}</span>
       </div>
       <div className="olymp-mode-grid">
         {[
@@ -391,11 +428,11 @@ export function Home() {
               />
             </div>
             <div className="mode-card-content">
-              <span className="eyebrow">{mode.label}</span>
-              <h3>{mode.name}</h3>
-              <p>{mode.text}</p>
+              <span className="eyebrow">{tr(mode.label)}</span>
+              <h3>{tr(mode.name)}</h3>
+              <p>{tr(mode.text)}</p>
               <Link href={mode.href}>
-                {mode.button}
+                {tr(mode.button)}
                 <ArrowUpRight size={18} />
               </Link>
             </div>
@@ -405,19 +442,19 @@ export function Home() {
       <section className="olymp-manifesto">
         <Columns3 size={34} />
         <div>
-          <span className="eyebrow">WISSEN WIRD SPIELSTÄRKE</span>
-          <h2>Dein stärkster Gegner war gestern du.</h2>
-          <p>Heute gehst du einen Zug weiter.</p>
+          <span className="eyebrow">{tr('WISSEN WIRD SPIELST\u00C4RKE')}</span>
+          <h2>{tr('Dein st\u00E4rkster Gegner war gestern du.')}</h2>
+          <p>{tr('Heute gehst du einen Zug weiter.')}</p>
         </div>
         <ActionLink secondary href="/akademie">
-          Die Akademie entdecken
+          {tr('Die Akademie entdecken')}
         </ActionLink>
       </section>
     </>
   );
 }
-
 export function Training() {
+  const tr = useT();
   const { settings, put, records } = useStore();
   const s = useStats();
   const weak = s.themes[0];
@@ -426,20 +463,24 @@ export function Training() {
   return (
     <>
       <Heading
-        god="ATHENE · DEIN PERSÖNLICHER PLAN"
+        god={tr('ATHENE \u00B7 DEIN PERS\u00D6NLICHER PLAN')}
         title={`Dein Training, ${settings.name}.`}
-        description="Kleine Schritte. Klare Aufgaben. Jeden Tag ein bisschen weiter."
+        description={tr('Kleine Schritte. Klare Aufgaben. Jeden Tag ein bisschen weiter.')}
       />
       <div className="training-intro">
         <div>
-          <span className="eyebrow">DEIN TAGESZIEL</span>
+          <span className="eyebrow">{tr('DEIN TAGESZIEL')}</span>
           <div className="goal-number">
-            {Math.floor(s.today / 60)} <span>/ {settings.goal} Minuten</span>
+            {Math.floor(s.today / 60)}{' '}
+            <span>
+              / {settings.goal}
+              {tr(' Minuten')}
+            </span>
           </div>
           <div className="progress-track">
             <span style={{ width: Math.min(100, (s.today / (settings.goal * 60)) * 100) + '%' }} />
           </div>
-          <p>Gezählt wird aktive Zeit in Training, Arena und Analyse.</p>
+          <p>{tr('Gez\u00E4hlt wird aktive Zeit in Training, Arena und Analyse.')}</p>
         </div>
         <div className="goal-controls">
           {([10, 20, 30] as const).map((goal) => (
@@ -451,7 +492,8 @@ export function Training() {
                 void put('settings', 'settings', { ...settings, goal }).catch(() => undefined)
               }
             >
-              {goal} Min.
+              {goal}
+              {tr(' Min.')}
             </button>
           ))}
         </div>
@@ -459,31 +501,31 @@ export function Training() {
       </div>
       <div className="metric-grid">
         <Metric
-          label="Puzzle-Rating"
+          label={tr('Puzzle-Rating')}
           value={s.rating}
           note={s.history.length ? 'Interne Trainingswertung' : 'Startwert · noch unbewertet'}
         />
         <Metric
-          label="Gelöste Aufgaben"
+          label={tr('Gel\u00F6ste Aufgaben')}
           value={s.solved}
           note={`${s.attempts.length} gespeicherte Versuche`}
         />
         <Metric
-          label="Trainingsserie"
+          label={tr('Trainingsserie')}
           value={s.streak + (s.streak === 1 ? ' Tag' : ' Tage')}
           note="Ein Puzzleversuch zählt als Trainingstag"
         />
-        <Metric label="Wiederholungen" value={s.due.length} note="Jetzt fällige Aufgaben" />
+        <Metric label={tr('Wiederholungen')} value={s.due.length} note="Jetzt fällige Aufgaben" />
       </div>
       <div className="section-title">
         <div>
-          <span className="eyebrow">DEIN PLAN FÜR HEUTE</span>
-          <h2>Trainiere mit einer Idee.</h2>
+          <span className="eyebrow">{tr('DEIN PLAN F\u00DCR HEUTE')}</span>
+          <h2>{tr('Trainiere mit einer Idee.')}</h2>
         </div>
         <span>
           {s.themes.length
-            ? 'Aus deinen Ergebnissen abgeleitet'
-            : 'Wir lernen deine Stärken erst kennen.'}
+            ? tr('Aus deinen Ergebnissen abgeleitet')
+            : tr('Wir lernen deine St\u00E4rken erst kennen.')}
         </span>
       </div>
       <div className="training-list">
@@ -534,10 +576,13 @@ export function Training() {
               <t.icon size={22} />
             </div>
             <div>
-              <h3>{t.title}</h3>
-              <p>{t.text}</p>
+              <h3>{tr(t.title)}</h3>
+              <p>{tr(t.text)}</p>
             </div>
-            <span className="duration">~ {t.time} Min.</span>
+            <span className="duration">
+              ~ {t.time}
+              {tr(' Min.')}
+            </span>
             <ArrowUpRight size={20} />
           </Link>
         ))}
@@ -545,11 +590,13 @@ export function Training() {
       <div className="mentor-note">
         <Portrait level={19} />
         <div>
-          <span className="eyebrow">ATHENES HINWEIS</span>
+          <span className="eyebrow">{tr('ATHENES HINWEIS')}</span>
           <p>
             {s.themes.length
               ? `Bei „${weak.name}“ hast du bisher ${Math.round(weak.rate * 100)} % ohne Hilfe gelöst (${weak.n} Versuche). Nimm dir Zeit für gegnerische Antworten.`
-              : 'Prüfe vor jedem Zug: Was droht mein Gegner? Mit weniger als fünf Versuchen pro Motiv treffen wir noch keine verlässliche Einschätzung.'}
+              : tr(
+                  'Pr\u00FCfe vor jedem Zug: Was droht mein Gegner? Mit weniger als f\u00FCnf Versuchen pro Motiv treffen wir noch keine verl\u00E4ssliche Einsch\u00E4tzung.',
+                )}
           </p>
         </div>
       </div>
@@ -557,19 +604,29 @@ export function Training() {
   );
 }
 function Metric({ label, value, note }: { label: string; value: string | number; note: string }) {
+  const tr = useT();
   return (
     <div className="metric">
-      <span>{label}</span>
+      <span>{tr(label)}</span>
       <strong>{value}</strong>
-      <small>{note}</small>
+      <small>{tr(note)}</small>
     </div>
   );
 }
-export function RatingChart({ history }: { history: { at: number; rating: number }[] }) {
+export function RatingChart({
+  history,
+}: {
+  history: {
+    at: number;
+    rating: number;
+  }[];
+}) {
+  const locale = useLocale();
+  const tr = useT();
   if (history.length < 2)
     return (
-      <Empty title="Deine Entwicklung braucht die ersten Schritte.">
-        Nach zwei bewerteten Erstversuchen entsteht hier dein Ratingverlauf.
+      <Empty title={tr('Deine Entwicklung braucht die ersten Schritte.')}>
+        {tr('Nach zwei bewerteten Erstversuchen entsteht hier dein Ratingverlauf.')}
       </Empty>
     );
   const lo = Math.min(...history.map((h) => h.rating)) - 20,
@@ -598,19 +655,21 @@ export function RatingChart({ history }: { history: { at: number; rating: number
             fill="white"
           >
             <title>
-              {new Date(p.at).toLocaleDateString('de-DE')} · {p.rating}
+              {new Date(p.at).toLocaleDateString(locale)} · {p.rating}
             </title>
           </circle>
         ))}
       </svg>
       <div className="chart-labels">
-        <span>{new Date(history[0].at).toLocaleDateString('de-DE')}</span>
-        <span>{new Date(history.at(-1)!.at).toLocaleDateString('de-DE')}</span>
+        <span>{new Date(history[0].at).toLocaleDateString(locale)}</span>
+        <span>{new Date(history.at(-1)!.at).toLocaleDateString(locale)}</span>
       </div>
     </div>
   );
 }
 export function Progress() {
+  const locale = useLocale();
+  const tr = useT();
   const s = useStats();
   const { records } = useStore();
   const completed = s.games.filter((g) => g.result && g.result !== '*');
@@ -638,49 +697,55 @@ export function Progress() {
   return (
     <>
       <Heading
-        god="ZEUS · DEIN AUFSTIEG"
-        title="Fortschritt, der dir gehört."
-        description="Deine echten Ergebnisse. Deine nächsten Möglichkeiten."
+        god={tr('ZEUS \u00B7 DEIN AUFSTIEG')}
+        title={tr('Fortschritt, der dir geh\u00F6rt.')}
+        description={tr('Deine echten Ergebnisse. Deine n\u00E4chsten M\u00F6glichkeiten.')}
       />
       <div className="metric-grid">
-        <Metric label="Puzzle-Rating" value={s.rating} note="Interner Startwert: 1.200" />
-        <Metric label="Gelöste Aufgaben" value={s.solved} note="Unterschiedliche Aufgaben" />
+        <Metric label={tr('Puzzle-Rating')} value={s.rating} note="Interner Startwert: 1.200" />
         <Metric
-          label="Aktive Trainingszeit"
+          label={tr('Gel\u00F6ste Aufgaben')}
+          value={s.solved}
+          note="Unterschiedliche Aufgaben"
+        />
+        <Metric
+          label={tr('Aktive Trainingszeit')}
           value={Math.floor(s.seconds / 60) + ' Min.'}
           note="Auf diesem Profil erfasst"
         />
         <Metric
-          label="Beendete Partien"
+          label={tr('Beendete Partien')}
           value={completed.length}
           note={`${completed.filter((g) => g.assists > 0).length} mit Trainingshilfen`}
         />
       </div>
       <section className="panel">
         <div className="panel-top">
-          <h2>Dein Ratingverlauf</h2>
-          <span className="tag">PUZZLETRAINING</span>
+          <h2>{tr('Dein Ratingverlauf')}</h2>
+          <span className="tag">{tr('PUZZLETRAINING')}</span>
         </div>
         <RatingChart history={s.history} />
         <details>
-          <summary>Wie wird mein Rating berechnet?</summary>
+          <summary>{tr('Wie wird mein Rating berechnet?')}</summary>
           <p>
-            Startwert 1.200. Elo-ähnliche Aktualisierung mit K = 24 und dem Lichess-Aufgabenrating
-            als Gegenspieler. Nur der erste Versuch einer unbekannten Aufgabe zählt. Hilfen, Fehler
-            oder Abbruch zählen dabei als nicht selbstständig gelöst. Wiederholungen bringen keine
-            weiteren Ratingpunkte. Keine FIDE- oder Plattformwertung.
+            {tr(
+              'Startwert 1.200. Elo-\u00E4hnliche Aktualisierung mit K = 24 und dem Lichess-Aufgabenrating als Gegenspieler. Nur der erste Versuch einer unbekannten Aufgabe z\u00E4hlt. Hilfen, Fehler oder Abbruch z\u00E4hlen dabei als nicht selbstst\u00E4ndig gel\u00F6st. Wiederholungen bringen keine weiteren Ratingpunkte. Keine FIDE- oder Plattformwertung.',
+            )}
           </p>
         </details>
       </section>
       <div className="two-columns">
         <section className="panel">
-          <h2>Stärken & Lernfelder</h2>
+          <h2>{tr('St\u00E4rken & Lernfelder')}</h2>
           {s.themes.length ? (
             s.themes.map((t) => (
               <Link className="theme-stat" href={'/puzzles?theme=' + t.key} key={t.key}>
                 <div>
-                  <strong>{t.name}</strong>
-                  <small>{t.n} Versuche · ohne Fehler und Hilfe</small>
+                  <strong>{tr(t.name)}</strong>
+                  <small>
+                    {t.n}
+                    {tr(' Versuche \u00B7 ohne Fehler und Hilfe')}
+                  </small>
                 </div>
                 <span>{Math.round(t.rate * 100)} %</span>
                 <div className="progress-track">
@@ -689,14 +754,15 @@ export function Progress() {
               </Link>
             ))
           ) : (
-            <Empty title="Noch keine sichere Einschätzung.">
-              Ab fünf Versuchen pro Motiv zeigen wir deine Lösequote. Starte mit gemischten
-              Aufgaben.
+            <Empty title={tr('Noch keine sichere Einsch\u00E4tzung.')}>
+              {tr(
+                'Ab f\u00FCnf Versuchen pro Motiv zeigen wir deine L\u00F6sequote. Starte mit gemischten Aufgaben.',
+              )}
             </Empty>
           )}
         </section>
         <section className="panel">
-          <h2>In der Arena</h2>
+          <h2>{tr('In der Arena')}</h2>
           {completed.length ? (
             <div className="bot-results">
               {[...new Set(completed.map((g) => g.level))]
@@ -707,9 +773,11 @@ export function Progress() {
                     <div className="bot-result" key={level}>
                       <Portrait level={level} />
                       <span>
-                        Stufe {level}
+                        {tr('Stufe ')}
+                        {level}
                         <small>
-                          {gs.length} Partien ·{' '}
+                          {gs.length}
+                          {tr(' Partien \u00B7')}{' '}
                           {
                             gs.filter(
                               (g) =>
@@ -717,7 +785,7 @@ export function Progress() {
                                 (g.color === 'b' && g.result === '0-1'),
                             ).length
                           }{' '}
-                          Siege
+                          {tr('Siege')}
                         </small>
                       </span>
                       <Swords size={17} />
@@ -726,35 +794,38 @@ export function Progress() {
                 })}
             </div>
           ) : (
-            <Empty title="Deine erste Herausforderung wartet.">
-              Spiele gegen einen der 20 Gegner. Ergebnisse und verwendete Hilfen werden gespeichert.
+            <Empty title={tr('Deine erste Herausforderung wartet.')}>
+              {tr(
+                'Spiele gegen einen der 20 Gegner. Ergebnisse und verwendete Hilfen werden gespeichert.',
+              )}
             </Empty>
           )}
           <ActionLink secondary href="/arena">
-            Zur Arena
+            {tr('Zur Arena')}
           </ActionLink>
         </section>
       </div>
       <section className="panel">
         <div className="panel-top">
-          <h2>Deine Meilensteine</h2>
+          <h2>{tr('Deine Meilensteine')}</h2>
           <span>
-            {badges.filter((b) => b.done).length} / {badges.length} erreicht
+            {badges.filter((b) => b.done).length} / {badges.length}
+            {tr(' erreicht')}
           </span>
         </div>
         <div className="badges">
           {badges.map((b) => (
             <div className={'badge ' + (b.done ? 'unlocked' : '')} key={b.title}>
               <b.icon size={30} />
-              <strong>{b.title}</strong>
-              <small>{b.text}</small>
+              <strong>{tr(b.title)}</strong>
+              <small>{tr(b.text)}</small>
               {b.done && <Check size={14} />}
             </div>
           ))}
         </div>
       </section>
       <section className="panel">
-        <h2>Analysierte Zugqualität</h2>
+        <h2>{tr('Analysierte Zugqualit\u00E4t')}</h2>
         {analyses.length ? (
           <div className="analysis-history">
             {analyses.map((a, i) => {
@@ -765,12 +836,13 @@ export function Progress() {
                 <div key={i}>
                   <strong>{mean === null ? '–' : mean.toFixed(1) + ' %'}</strong>
                   <span>
-                    {a.results.length} / {a.moves.length} Halbzüge ·{' '}
-                    {a.budget.toLocaleString('de-DE')} Knoten
+                    {a.results.length} / {a.moves.length}
+                    {tr(' Halbz\u00FCge \u00B7')} {a.budget.toLocaleString(locale)}
+                    {tr(' Knoten')}
                   </span>
                   <small>
-                    {a.complete ? 'Vollständige Analyse' : 'Teilweise analysiert'} · beide Farben
-                    gemeinsam
+                    {a.complete ? tr('Vollst\u00E4ndige Analyse') : tr('Teilweise analysiert')}
+                    {tr(' \u00B7 beide Farben gemeinsam')}
                   </small>
                 </div>
               );
@@ -778,14 +850,20 @@ export function Progress() {
           </div>
         ) : (
           <p>
-            Noch keine Analyse gespeichert. Vergleiche nur Auswertungen mit derselben Intensität.
+            {tr(
+              'Noch keine Analyse gespeichert. Vergleiche nur Auswertungen mit derselben Intensit\u00E4t.',
+            )}
           </p>
         )}
       </section>
       {records.some((r) => r.kind === 'mistake') && (
         <section className="panel">
-          <h2>Deine Fehlerstellungen</h2>
-          <p>Aus echten Wendepunkten deiner Analysen. Übe den besten gefundenen Zug erneut.</p>
+          <h2>{tr('Deine Fehlerstellungen')}</h2>
+          <p>
+            {tr(
+              'Aus echten Wendepunkten deiner Analysen. \u00DCbe den besten gefundenen Zug erneut.',
+            )}
+          </p>
           {records
             .filter((r) => r.kind === 'mistake')
             .slice(-12)
@@ -798,8 +876,12 @@ export function Progress() {
                   href={'/puzzles?mistake=' + encodeURIComponent(r.id)}
                 >
                   <span>
-                    {m.san} · Halbzug {m.ply + 1}
-                    <small>{m.done ? 'Ohne Hilfe wiederholt' : 'Zur Wiederholung bereit'}</small>
+                    {m.san}
+                    {tr(' \u00B7 Halbzug ')}
+                    {m.ply + 1}
+                    <small>
+                      {m.done ? tr('Ohne Hilfe wiederholt') : tr('Zur Wiederholung bereit')}
+                    </small>
                   </span>
                   <ArrowRight size={16} />
                 </Link>

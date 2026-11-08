@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/lib/i18n';
 import { uuid } from '@/lib/id';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Chess } from 'chess.js';
@@ -47,7 +48,9 @@ const explanations: Record<string, string> = {
 };
 type Mode = 'adaptive' | 'daily' | 'series' | 'review' | 'time';
 export default function Puzzles() {
-  const { records, ready, put } = useStore();
+  const tr = useT();
+  const { records, ready, put, user, rewardPuzzle } = useStore();
+  const [eloEarned, setEloEarned] = useState<number | null>(null);
   const stats = useStats();
   const [mode, setMode] = useState<Mode>('adaptive'),
     [theme, setTheme] = useState(''),
@@ -126,6 +129,7 @@ export default function Puzzles() {
         solutionMoves.current = p.moves.slice(1);
         baseStep.current = 1;
         attempt.current = { id: uuid(), at: Date.now(), start: Date.now(), hints: 0, errors: 0 };
+        setEloEarned(null);
         setPuzzle(p);
         setFen(g.fen());
         setStep(1);
@@ -188,8 +192,14 @@ export default function Puzzles() {
     };
   }, []);
   const persist = useCallback(
-    async (solved: boolean, h = attempt.current.hints, e = attempt.current.errors) => {
+    async (
+      solved: boolean,
+      h = attempt.current.hints,
+      e = attempt.current.errors,
+      line = puzzle?.moves,
+    ) => {
       if (!puzzle) return;
+      const attemptId = attempt.current.id;
       const a: Attempt = {
         puzzleId: puzzle.id,
         rating: puzzle.rating,
@@ -202,12 +212,30 @@ export default function Puzzles() {
         mode: mistake ? 'review' : mode,
       };
       try {
-        await put('attempt:' + attempt.current.id, 'attempt', a);
+        await put('attempt:' + attemptId, 'attempt', a);
+        if (solved && !mistake) {
+          const previous = records.some(
+            (r) =>
+              r.kind === 'attempt' &&
+              (r.value as Attempt).puzzleId === puzzle.id &&
+              (r.value as Attempt).success,
+          );
+          if (attempt.current.id === attemptId) setEloEarned(previous ? 0 : 1);
+          if (user && line) {
+            try {
+              const earned = await rewardPuzzle(puzzle.id, line);
+              if (attempt.current.id === attemptId) setEloEarned(earned);
+            } catch {
+              if (attempt.current.id === attemptId)
+                setError('Lokal gespeichert. Deine Online-Elo konnte noch nicht bestätigt werden.');
+            }
+          }
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
       }
     },
-    [puzzle, put, mistake, mode],
+    [puzzle, put, mistake, mode, records, user, rewardPuzzle],
   );
   useEffect(() => {
     if (!timeEnd) return;
@@ -252,7 +280,7 @@ export default function Puzzles() {
     setStep(next);
     setMessage('Richtig. Berechne den nächsten Zug.');
     const completed = next >= moves.length || g.isCheckmate();
-    void persist(completed);
+    void persist(completed, attempt.current.hints, attempt.current.errors, moves);
     if (completed) {
       setDone(true);
       setFinishedSeconds(Math.max(1, Math.round((Date.now() - attempt.current.start) / 1000)));
@@ -317,16 +345,18 @@ export default function Puzzles() {
   return (
     <>
       <Heading
-        god={mode === 'time' ? 'CHRONOS · ZEITTRAINING' : 'ATHENE · TAKTIK & PUZZLES'}
-        title="Sieh den entscheidenden Zug."
-        description="Echte Stellungen. Klare Ideen. Dein tägliches Training."
+        god={
+          mode === 'time' ? tr('CHRONOS \u00B7 ZEITTRAINING') : tr('ATHENE \u00B7 TAKTIK & PUZZLES')
+        }
+        title={tr('Sieh den entscheidenden Zug.')}
+        description={tr('Echte Stellungen. Klare Ideen. Dein t\u00E4gliches Training.')}
       >
         <span className="rating-pill">
           {stats.rating}
-          <small>PUZZLE-RATING</small>
+          <small>{tr('PUZZLE-RATING')}</small>
         </span>
       </Heading>
-      <div className="tabs" role="tablist" aria-label="Puzzlemodus">
+      <div className="tabs" role="tablist" aria-label={tr('Puzzlemodus')}>
         {(
           [
             ['adaptive', 'Adaptiv'],
@@ -343,7 +373,7 @@ export default function Puzzles() {
             key={m}
             onClick={() => startMode(m, Date.now())}
           >
-            {label}
+            {tr(label)}
             {m === 'review' && stats.due.length > 0 && <span>{stats.due.length}</span>}
           </button>
         ))}
@@ -354,12 +384,12 @@ export default function Puzzles() {
             <Portrait level={mode === 'time' ? 10 : 19} />
             <div>
               <strong>
-                {mode === 'time' ? 'Chronos fordert dich heraus' : 'Athenes Taktiktraining'}
+                {mode === 'time' ? tr('Chronos fordert dich heraus') : tr('Athenes Taktiktraining')}
               </strong>
               <span>
                 {puzzle
                   ? `${new Chess(solutionStart.current || puzzle.fen).turn() === 'w' ? 'Weiß' : 'Schwarz'} am Zug`
-                  : 'Wähle deine Aufgabe'}
+                  : tr('W\u00E4hle deine Aufgabe')}
               </span>
             </div>
             {remaining !== null && (
@@ -370,7 +400,7 @@ export default function Puzzles() {
           </div>
           {loading ? (
             <div className="board-loading">
-              <Loading text="Die nächste Aufgabe wird vorbereitet …" />
+              <Loading text={tr('Die n\u00E4chste Aufgabe wird vorbereitet \u2026')} />
             </div>
           ) : puzzle && displayedFen ? (
             <Chessboard
@@ -383,8 +413,8 @@ export default function Puzzles() {
             />
           ) : (
             <div className="board-loading">
-              <Empty title="Bereit für deinen nächsten Zug?">
-                Wähle einen Trainingsmodus oder passe die Filter an.
+              <Empty title={tr('Bereit f\u00FCr deinen n\u00E4chsten Zug?')}>
+                {tr('W\u00E4hle einen Trainingsmodus oder passe die Filter an.')}
               </Empty>
             </div>
           )}
@@ -392,56 +422,63 @@ export default function Puzzles() {
             <span>
               {puzzle
                 ? `Aufgabe ${puzzle.id} · ${mistake ? 'Eigene Fehlerstellung' : puzzle.rating + ' Punkte'}`
-                : '1.000 Lichess-Puzzles + eine eigene Lehrstellung'}
+                : tr('1.000 Lichess-Puzzles + eine eigene Lehrstellung')}
             </span>
-            <span>Tippen oder ziehen</span>
+            <span>{tr('Tippen oder ziehen')}</span>
           </div>
           {message && (
             <div className={'puzzle-feedback ' + (success ? 'success' : '')} role="status">
               {success ? <Check size={20} /> : <TargetIcon />}
-              <p>{message}</p>
+              <p>{tr(message)}</p>
+              {success && eloEarned !== null && (
+                <span className="puzzle-elo">
+                  {eloEarned > 0 ? tr('+1 Elo') : tr('Bereits gewertet')}
+                </span>
+              )}
             </div>
           )}
-          {error && <ErrorText>{error}</ErrorText>}
+          {error && <ErrorText>{tr(error)}</ErrorText>}
         </div>
         <aside className="play-panel">
           <section className="panel">
             <div className="panel-top">
-              <h2>Dein Fokus</h2>
+              <h2>{tr('Dein Fokus')}</h2>
               <Shuffle size={18} />
             </div>
             {puzzle?.id === 'olympion-overload-1' && (
               <p className="small-text">
-                Lehrstellung: Finde Matt in zwei Zügen. Der Turm g7 hat zwei Verteidigungsaufgaben.
+                {tr(
+                  'Lehrstellung: Finde Matt in zwei Z\u00FCgen. Der Turm g7 hat zwei Verteidigungsaufgaben.',
+                )}
               </p>
             )}
             <label className="field">
-              Taktisches Motiv
+              {tr('Taktisches Motiv')}
               <select
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
                 disabled={mode === 'daily' || mode === 'review'}
               >
-                <option value="">Alle Motive</option>
+                <option value="">{tr('Alle Motive')}</option>
                 {Object.entries(THEMES).map(([key, label]) => (
                   <option value={key} key={key}>
-                    {label}
+                    {tr(label)}
                   </option>
                 ))}
               </select>
             </label>
             <label className="field">
-              Schwierigkeit
+              {tr('Schwierigkeit')}
               <select
                 value={range}
                 onChange={(e) => setRange(e.target.value)}
                 disabled={mode === 'daily' || mode === 'review'}
               >
-                <option value="all">Passend zu meinem Rating</option>
-                <option value="400-1000">Einstieg · 400–1.000</option>
-                <option value="1000-1600">Aufbau · 1.000–1.600</option>
-                <option value="1600-2200">Fortgeschritten · 1.600–2.200</option>
-                <option value="2200-3000">Anspruchsvoll · 2.200–3.000</option>
+                <option value="all">{tr('Passend zu meinem Rating')}</option>
+                <option value="400-1000">{tr('Einstieg \u00B7 400\u20131.000')}</option>
+                <option value="1000-1600">{tr('Aufbau \u00B7 1.000\u20131.600')}</option>
+                <option value="1600-2200">{tr('Fortgeschritten \u00B7 1.600\u20132.200')}</option>
+                <option value="2200-3000">{tr('Anspruchsvoll \u00B7 2.200\u20133.000')}</option>
               </select>
             </label>
             <button
@@ -449,30 +486,34 @@ export default function Puzzles() {
               onClick={() => void choose()}
               disabled={loading}
             >
-              Aufgabe auswählen <ArrowRight size={16} />
+              {tr('Aufgabe ausw\u00E4hlen ')}
+              <ArrowRight size={16} />
             </button>
             {mode === 'time' && (
               <p className="small-text">
-                Drei Minuten. Die Uhr läuft durch. Gelöste Aufgaben zählen einen Punkt; Hinweise
-                werden gespeichert. Bereits bekannte Aufgaben erzeugen kein weiteres Rating.
+                {tr(
+                  'Drei Minuten. Die Uhr l\u00E4uft durch. Gel\u00F6ste Aufgaben z\u00E4hlen einen Punkt; Hinweise werden gespeichert. Bereits bekannte Aufgaben erzeugen kein weiteres Rating.',
+                )}
               </p>
             )}
           </section>
           <section className="panel hint-panel">
             <div className="panel-top">
-              <h2>Ein kleiner Impuls?</h2>
+              <h2>{tr('Ein kleiner Impuls?')}</h2>
               <Lightbulb size={19} />
             </div>
-            <p>Erst selbst rechnen. Dann Schritt für Schritt Unterstützung holen.</p>
+            <p>
+              {tr('Erst selbst rechnen. Dann Schritt f\u00FCr Schritt Unterst\u00FCtzung holen.')}
+            </p>
             {hints > 0 && (
               <div className="hint-text" role="status">
-                {hintText}
+                {tr(hintText)}
               </div>
             )}
             <div className="hint-steps">
-              <span className={hints >= 1 ? 'active' : ''}>1 · Idee</span>
-              <span className={hints >= 2 ? 'active' : ''}>2 · Figur</span>
-              <span className={hints >= 3 ? 'active' : ''}>3 · Zug</span>
+              <span className={hints >= 1 ? 'active' : ''}>{tr('1 \u00B7 Idee')}</span>
+              <span className={hints >= 2 ? 'active' : ''}>{tr('2 \u00B7 Figur')}</span>
+              <span className={hints >= 3 ? 'active' : ''}>{tr('3 \u00B7 Zug')}</span>
             </div>
             <button
               className="button secondary full"
@@ -480,16 +521,18 @@ export default function Puzzles() {
               disabled={!puzzle || done || hints >= 3}
             >
               <Lightbulb size={16} />
-              Hinweis {Math.min(3, hints + 1)} anzeigen
+              {tr('Hinweis ')}
+              {Math.min(3, hints + 1)}
+              {tr(' anzeigen')}
             </button>
             <button className="text-button" onClick={reveal} disabled={!puzzle || done}>
               <Eye size={15} />
-              Lösung ansehen
+              {tr('L\u00F6sung ansehen')}
             </button>
           </section>
           {done && puzzle && (
             <section className="panel">
-              <h2>{success ? 'Die Idee hinter dem Zug' : 'Die Lösung verstehen'}</h2>
+              <h2>{success ? tr('Die Idee hinter dem Zug') : tr('Die L\u00F6sung verstehen')}</h2>
               <p>
                 {explanations[puzzle.themes.find((t) => explanations[t]) || ''] ||
                   'Berechne die gegnerischen Antworten. Die folgende Zugfolge zeigt die taktische Idee.'}
@@ -500,7 +543,7 @@ export default function Puzzles() {
               <div className="button-row">
                 <button
                   className="icon-button"
-                  aria-label="Lösung zurück"
+                  aria-label={tr('L\u00F6sung zur\u00FCck')}
                   disabled={solutionView === 0}
                   onClick={() =>
                     setSolutionView(Math.max(0, (solutionView ?? solutionMoves.current.length) - 1))
@@ -513,7 +556,7 @@ export default function Puzzles() {
                 </span>
                 <button
                   className="icon-button"
-                  aria-label="Lösung vor"
+                  aria-label={tr('L\u00F6sung vor')}
                   disabled={
                     (solutionView ?? solutionMoves.current.length) === solutionMoves.current.length
                   }
@@ -525,21 +568,27 @@ export default function Puzzles() {
                 </button>
               </div>
               <p className="small-text">
-                {hints} Hinweise · {errors} Fehler · {finishedSeconds} Sekunden
+                {hints}
+                {tr(' Hinweise \u00B7 ')}
+                {errors}
+                {tr(' Fehler \u00B7 ')}
+                {finishedSeconds}
+                {tr(' Sekunden')}
               </p>
               <button
                 className="button primary full"
                 disabled={mode === 'time' && remaining === 0}
                 onClick={() => void choose()}
               >
-                Nächste Aufgabe <ArrowRight size={17} />
+                {tr('N\u00E4chste Aufgabe ')}
+                <ArrowRight size={17} />
               </button>
               {puzzle.id.startsWith('olympion-') ? (
-                <small>Eigene OLYMPION-Lehrstellung</small>
+                <small>{tr('Eigene OLYMPION-Lehrstellung')}</small>
               ) : (
                 puzzle.url && (
                   <a className="source-link" target="_blank" rel="noreferrer" href={puzzle.url}>
-                    Ursprungspartie auf Lichess
+                    {tr('Ursprungspartie auf Lichess')}
                   </a>
                 )
               )}

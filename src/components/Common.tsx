@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/lib/i18n';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { X, ArrowUpRight, LoaderCircle } from 'lucide-react';
 import Link from 'next/link';
@@ -40,12 +41,13 @@ export function Heading({
   description?: string;
   children?: ReactNode;
 }) {
+  const tr = useT();
   return (
     <header className="page-heading">
       <div>
-        <span className="eyebrow">{god}</span>
-        <h1>{title}</h1>
-        {description && <p>{description}</p>}
+        <span className="eyebrow">{tr(god)}</span>
+        <h1>{tr(title)}</h1>
+        {description && <p>{tr(description)}</p>}
       </div>
       {children && <div className="heading-actions">{children}</div>}
     </header>
@@ -68,18 +70,20 @@ export function ActionLink({
   );
 }
 export function Loading({ text = 'Wird geladen …' }: { text?: string }) {
+  const tr = useT();
   return (
     <div className="loading" role="status">
       <LoaderCircle className="spin" size={21} />
-      <span>{text}</span>
+      <span>{tr(text)}</span>
     </div>
   );
 }
 export function Empty({ title, children }: { title: string; children: ReactNode }) {
+  const tr = useT();
   return (
     <div className="empty">
       <Logo />
-      <h3>{title}</h3>
+      <h3>{tr(title)}</h3>
       <p>{children}</p>
     </div>
   );
@@ -93,6 +97,7 @@ export function Modal({
   children: ReactNode;
   onClose: () => void;
 }) {
+  const tr = useT();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const old = document.activeElement as HTMLElement;
@@ -132,8 +137,8 @@ export function Modal({
     >
       <div ref={ref} className="modal" role="dialog" aria-modal="true" aria-label={title}>
         <div className="panel-top">
-          <h2>{title}</h2>
-          <button className="icon-button" onClick={onClose} aria-label="Schließen">
+          <h2>{tr(title)}</h2>
+          <button className="icon-button" onClick={onClose} aria-label={tr('Schlie\u00DFen')}>
             <X size={20} />
           </button>
         </div>
@@ -143,6 +148,7 @@ export function Modal({
   );
 }
 export function QualityCard({ result }: { result: MoveQuality }) {
+  const tr = useT();
   return (
     <div className="quality-card">
       <div className="quality-number">
@@ -150,31 +156,36 @@ export function QualityCard({ result }: { result: MoveQuality }) {
         <span>%</span>
       </div>
       <div>
-        <strong>{result.label}</strong>
+        <strong>{tr(result.label)}</strong>
         <p>
-          {result.san} · Bestzug {result.bestSan}
+          {result.san}
+          {tr(' \u00B7 Bestzug ')}
+          {result.bestSan}
         </p>
       </div>
-      <p className="quality-explanation">{result.explanation}</p>
+      <p className="quality-explanation">{tr(result.explanation)}</p>
       <div className="quality-meta">
         <span>
           {scoreText(result.before)} → {scoreText(result.played)}
         </span>
         <span>
-          Tiefe {result.depth} · {result.method}
+          {tr('Tiefe ')}
+          {result.depth} · {tr(result.method)}
         </span>
-        {result.confidence === 'gering' && <span>Geringe Sicherheit</span>}
+        {result.confidence === 'gering' && <span>{tr('Geringe Sicherheit')}</span>}
       </div>
       <details>
-        <summary>Was bedeutet der Prozentwert?</summary>
+        <summary>{tr('Was bedeutet der Prozentwert?')}</summary>
         <p>
-          OLYMPION vergleicht den erwarteten Punktanteil des Bestzugs mit deinem Zug: 100 × (1 −
-          Punktverlust).{' '}
+          {tr(
+            'OLYMPION vergleicht den erwarteten Punktanteil des Bestzugs mit deinem Zug: 100 \u00D7 (1 \u2212 Punktverlust).',
+          )}{' '}
           {result.method === 'Näherung'
-            ? 'Diese Suche verwendet eine monotone Näherung aus Bauerneinheiten.'
-            : 'Grundlage sind Stockfish-WDL-Schätzungen.'}{' '}
-          Der Wert beschreibt diese Suche. Er ist keine Gewinnwahrscheinlichkeit und keine
-          offizielle Spielstärkewertung.
+            ? tr('Diese Suche verwendet eine monotone N\u00E4herung aus Bauerneinheiten.')
+            : tr('Grundlage sind Stockfish-WDL-Sch\u00E4tzungen.')}{' '}
+          {tr(
+            'Der Wert beschreibt diese Suche. Er ist keine Gewinnwahrscheinlichkeit und keine offizielle Spielst\u00E4rkewertung.',
+          )}
         </p>
       </details>
     </div>
@@ -191,11 +202,12 @@ export function Toggle({
   label: string;
   description?: string;
 }) {
+  const tr = useT();
   return (
     <label className="toggle-row">
       <span>
-        <strong>{label}</strong>
-        {description && <small>{description}</small>}
+        <strong>{tr(label)}</strong>
+        {description && <small>{tr(description)}</small>}
       </span>
       <input
         className="toggle"
@@ -207,9 +219,10 @@ export function Toggle({
   );
 }
 export function ErrorText({ children }: { children: ReactNode }) {
+  const tr = useT();
   return (
     <p className="inline-error" role="alert">
-      {children}
+      {typeof children === 'string' ? tr(children) : children}
     </p>
   );
 }

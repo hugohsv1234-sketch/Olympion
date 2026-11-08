@@ -1,18 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
-import {
-  Check,
-  Cloud,
-  Download,
-  HardDrive,
-  LogOut,
-  RefreshCw,
-  Save,
-  Smartphone,
-  Upload,
-} from 'lucide-react';
-import { cloud, cloudConfigured } from '@/lib/cloud';
-import { download, validateBackup, loadRecords } from '@/lib/storage';
+import { Check, Download, HardDrive, Smartphone, Upload } from 'lucide-react';
+import AccountPanel from './AccountPanel';
+import { useT } from '@/lib/i18n';
+import { download, validateBackup } from '@/lib/storage';
 import { restore } from '@/lib/chess';
 import { cacheUrls, CACHE_VERSION, installApp, standalone } from '@/lib/pwa';
 import { puzzleIndex } from '@/lib/puzzles';
@@ -20,12 +11,10 @@ import type { AnalysisRecord, GameRecord, RecordItem } from '@/lib/types';
 import { useStore } from './Provider';
 import { ErrorText, Heading, Modal, Toggle } from './Common';
 export default function Profile() {
-  const { settings, records, ready, put, putMany, user, sync, importGuest, status } = useStore();
-  const [name, setName] = useState(settings.name),
-    [email, setEmail] = useState(''),
-    [password, setPassword] = useState(''),
-    [mode, setMode] = useState<'signin' | 'signup'>('signin'),
-    [busy, setBusy] = useState(false),
+  const tr = useT();
+  const { settings, records, ready, put, putMany, user } = useStore();
+  const t = useT();
+  const [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [message, setMessage] = useState(''),
     [instructions, setInstructions] = useState(false),
@@ -35,11 +24,7 @@ export default function Profile() {
     [puzzlesCached, setPuzzlesCached] = useState(0),
     [usage, setUsage] = useState(''),
     [backup, setBackup] = useState<RecordItem[] | null>(null),
-    [guestCount, setGuestCount] = useState(0),
     [updateWaiting, setUpdateWaiting] = useState(false);
-  useEffect(() => {
-    if (ready) setName(settings.name);
-  }, [ready, settings.name]);
   const refreshCache = async () => {
     if ('caches' in window) {
       const cache = await caches.open(CACHE_VERSION);
@@ -57,7 +42,6 @@ export default function Profile() {
   useEffect(() => {
     setInstalled(standalone());
     void refreshCache();
-    void loadRecords('guest').then((rs) => setGuestCount(rs.length));
     if ('serviceWorker' in navigator)
       void navigator.serviceWorker.getRegistration().then((reg) => {
         setUpdateWaiting(Boolean(reg?.waiting));
@@ -75,31 +59,6 @@ export default function Profile() {
     } finally {
       setBusy(false);
     }
-  };
-  const auth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await action(
-      async () => {
-        const c = cloud();
-        if (!c) throw new Error('Cloudzugang wurde noch nicht eingerichtet.');
-        if (mode === 'signup') {
-          const { data, error } = await c.auth.signUp({
-            email,
-            password,
-            options: { emailRedirectTo: location.origin + '/profil' },
-          });
-          if (error) throw error;
-          setPassword('');
-          return data;
-        }
-        const { error } = await c.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        setPassword('');
-      },
-      mode === 'signup'
-        ? 'Registrierung angenommen. Falls die E-Mail-Bestätigung aktiv ist, bestätige bitte den Link in deinem Postfach.'
-        : 'Du bist angemeldet. Deine Kontodaten werden geladen.',
-    );
   };
   const offline = async (kind: 'engine' | 'puzzles') => {
     await action(
@@ -145,41 +104,91 @@ export default function Profile() {
   return (
     <>
       <Heading
-        god="DEIN PROFIL · DEINE EINSTELLUNGEN"
-        title="Deine Akademie. Dein Rhythmus."
-        description="Fortschritte sichern, Darstellung anpassen und unterwegs weitertrainieren."
+        god={tr('DEIN PROFIL \u00B7 DEINE EINSTELLUNGEN')}
+        title={tr('Deine Akademie. Dein Rhythmus.')}
+        description={tr(
+          'Fortschritte sichern, Darstellung anpassen und unterwegs weitertrainieren.',
+        )}
       />
       <div className="profile-grid">
+        <AccountPanel />
         <section className="panel">
           <div className="panel-top">
-            <h2>Dein Profil</h2>
-            <span className="tag">{user ? 'KONTO' : 'GAST'}</span>
+            <h2>{t('Deine Einstellungen', 'Your settings')}</h2>
+            <span className="tag">{tr('OLYMPION')}</span>
           </div>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
+
+          <div className="settings-intro">
+            <span className="eyebrow">
+              {t('DEIN STIL. DEINE REGELN.', 'YOUR STYLE. YOUR RULES.')}
+            </span>
+            <p>
+              {t('Passe die Akademie an deinen Rhythmus an.', 'Make the academy work your way.')}
+            </p>
+          </div>
+          <Toggle
+            label={t('Nachtmodus', 'Dark mode')}
+            description={t(
+              'Aus: heller Marmor und schwarze Schrift',
+              'Off: light marble and black text',
+            )}
+            checked={settings.theme === 'dark'}
+            onChange={(v) =>
               void action(
-                () => put('settings', 'settings', { ...settings, name: name.trim() || 'Gast' }),
-                'Profil gespeichert.',
-              );
-            }}
-          >
-            <label className="field">
-              Dein Name
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={60}
-                required
-              />
-            </label>
-            <button className="button primary" disabled={!ready || busy}>
-              <Save size={16} />
-              Profil speichern
-            </button>
-          </form>
+                () => put('settings', 'settings', { ...settings, theme: v ? 'dark' : 'light' }),
+                t('Design gespeichert.', 'Theme saved.'),
+              )
+            }
+          />
+          <label className="field language-field">
+            {t('Sprache der App', 'App language')}
+            <select
+              value={settings.language}
+              onChange={(e) =>
+                void action(
+                  () =>
+                    put('settings', 'settings', {
+                      ...settings,
+                      language: e.target.value as 'de' | 'en',
+                    }),
+                  t('Sprache gespeichert.', 'Language saved.'),
+                )
+              }
+            >
+              <option value="de">{tr('Deutsch')}</option>
+              <option value="en">{tr('English')}</option>
+            </select>
+          </label>
+          <Toggle
+            label={t('Premoves', 'Premoves')}
+            description={t(
+              'Züge während des gegnerischen Zugs vormerken',
+              'Queue a move while the bot is thinking',
+            )}
+            checked={settings.premoves}
+            onChange={(v) =>
+              void action(
+                () => put('settings', 'settings', { ...settings, premoves: v }),
+                t('Spieleinstellung gespeichert.', 'Game setting saved.'),
+              )
+            }
+          />
+          <Toggle
+            label={t('Live-Analyse gegen Bots', 'Live analysis against bots')}
+            description={t(
+              'Zugqualität nach deinem Zug. Auch im Spiel umschaltbar.',
+              'Move quality after you move. You can change this during a game.',
+            )}
+            checked={settings.liveAnalysis}
+            onChange={(v) =>
+              void action(
+                () => put('settings', 'settings', { ...settings, liveAnalysis: v }),
+                t('Spieleinstellung gespeichert.', 'Game setting saved.'),
+              )
+            }
+          />
           <label className="field goal-field">
-            Tagesziel
+            {tr('Tagesziel')}
             <select
               value={settings.goal}
               onChange={(e) =>
@@ -189,13 +198,13 @@ export default function Profile() {
                 )
               }
             >
-              <option value={10}>10 Minuten</option>
-              <option value={20}>20 Minuten</option>
-              <option value={30}>30 Minuten</option>
+              <option value={10}>{tr('10 Minuten')}</option>
+              <option value={20}>{tr('20 Minuten')}</option>
+              <option value={30}>{tr('30 Minuten')}</option>
             </select>
           </label>
           <Toggle
-            label="Brettkoordinaten"
+            label={tr('Brettkoordinaten')}
             checked={settings.coordinates}
             onChange={(v) =>
               void action(
@@ -205,7 +214,7 @@ export default function Profile() {
             }
           />
           <Toggle
-            label="Hoher Brettkontrast"
+            label={tr('Hoher Brettkontrast')}
             checked={settings.contrast}
             onChange={(v) =>
               void action(
@@ -215,8 +224,8 @@ export default function Profile() {
             }
           />
           <Toggle
-            label="Animationen"
-            description="Die Systemeinstellung für reduzierte Bewegung hat Vorrang."
+            label={tr('Animationen')}
+            description={tr('Die Systemeinstellung f\u00FCr reduzierte Bewegung hat Vorrang.')}
             checked={settings.motion}
             onChange={(v) =>
               void action(
@@ -226,7 +235,7 @@ export default function Profile() {
             }
           />
           <Toggle
-            label="Zugklang"
+            label={tr('Zugklang')}
             checked={settings.sound}
             onChange={(v) =>
               void action(
@@ -236,139 +245,21 @@ export default function Profile() {
             }
           />
         </section>
-        <section className="panel">
-          <div className="panel-top">
-            <h2>
-              <Cloud size={20} />
-              Konto & Synchronisierung
-            </h2>
-            <span className="status-dot" />
-          </div>
-          {user ? (
-            <>
-              <p>
-                Angemeldet als <strong>{user.email}</strong>
-              </p>
-              <p className="sync-status">{status}</p>
-              <button
-                className="button secondary"
-                disabled={busy}
-                onClick={() =>
-                  void action(sync, 'Synchronisierung angestoßen. Der Status zeigt das Ergebnis.')
-                }
-              >
-                <RefreshCw size={16} />
-                Jetzt synchronisieren
-              </button>
-              {guestCount > 0 && (
-                <div className="guest-migration">
-                  <h3>Gasttraining übernehmen</h3>
-                  <p>
-                    {guestCount} lokale Einträge können in dieses Konto übernommen werden. Bereits
-                    vorhandene IDs werden ausgelassen.
-                  </p>
-                  <button
-                    className="button secondary"
-                    disabled={busy}
-                    onClick={() =>
-                      void action(
-                        importGuest,
-                        'Gastdaten übernommen. Vorhandene Einträge wurden beibehalten.',
-                      )
-                    }
-                  >
-                    Gastdaten übernehmen
-                  </button>
-                </div>
-              )}
-              <button
-                className="text-button"
-                disabled={busy}
-                onClick={() =>
-                  void action(async () => {
-                    const { error } = await cloud()!.auth.signOut();
-                    if (error) throw error;
-                  }, 'Abgemeldet. Das separate Gastprofil ist jetzt aktiv.')
-                }
-              >
-                <LogOut size={15} />
-                Abmelden
-              </button>
-            </>
-          ) : cloudConfigured ? (
-            <>
-              <p>
-                Nutze dein Training auf Handy, iPad und Desktop. Gastdaten bleiben getrennt, bis du
-                sie ausdrücklich übernimmst.
-              </p>
-              <div className="segmented">
-                <button
-                  className={mode === 'signin' ? 'selected' : ''}
-                  onClick={() => setMode('signin')}
-                >
-                  Anmelden
-                </button>
-                <button
-                  className={mode === 'signup' ? 'selected' : ''}
-                  onClick={() => setMode('signup')}
-                >
-                  Registrieren
-                </button>
-              </div>
-              <form onSubmit={(e) => void auth(e)}>
-                <label className="field">
-                  E-Mail
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </label>
-                <label className="field">
-                  Passwort
-                  <input
-                    type="password"
-                    minLength={8}
-                    maxLength={128}
-                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </label>
-                <button className="button primary full" disabled={busy}>
-                  {mode === 'signup' ? 'Konto erstellen' : 'Anmelden'}
-                </button>
-              </form>
-            </>
-          ) : (
-            <div className="cloud-unconfigured">
-              <HardDrive size={30} />
-              <h3>Dein Gasttraining funktioniert sofort.</h3>
-              <p>
-                Die Kontofunktion ist in dieser Installation noch nicht eingerichtet. Der Betreiber
-                muss die Supabase-Konfiguration und Datenbankmigration aus DEPLOYMENT.md aktivieren.
-              </p>
-              <p className="small-text">
-                Gastdaten sind an diesen Browser gebunden. Sichere sie regelmäßig als JSON.
-              </p>
-            </div>
-          )}
-        </section>
+
         <section className="panel">
           <div className="panel-top">
             <h2>
               <Smartphone size={20} />
-              OLYMPION als App
+              {tr('OLYMPION als App')}
             </h2>
             {installed && <Check size={19} />}
           </div>
           <p>
             {installed
-              ? 'Du nutzt OLYMPION bereits als eigenständige App.'
-              : 'Installiere die Akademie auf deinem Home-Bildschirm und starte direkt ins Training.'}
+              ? tr('Du nutzt OLYMPION bereits als eigenst\u00E4ndige App.')
+              : tr(
+                  'Installiere die Akademie auf deinem Home-Bildschirm und starte direkt ins Training.',
+                )}
           </p>
           <button
             className="button primary"
@@ -382,19 +273,22 @@ export default function Profile() {
             }
           >
             <Download size={16} />
-            {installed ? 'Bereits als App geöffnet' : 'App installieren'}
+            {installed ? tr('Bereits als App ge\u00F6ffnet') : tr('App installieren')}
           </button>
           <div className="offline-section">
-            <h3>Dein Training für unterwegs</h3>
+            <h3>{tr('Dein Training f\u00FCr unterwegs')}</h3>
             <p className="small-text">
-              App-Rahmen und besuchte Inhalte werden zwischengespeichert. Lade Engine und Aufgaben
-              gezielt für Offlinebetrieb herunter.
+              {tr(
+                'App-Rahmen und besuchte Inhalte werden zwischengespeichert. Lade Engine und Aufgaben gezielt f\u00FCr Offlinebetrieb herunter.',
+              )}
             </p>
             <div className="offline-item">
               <span>
-                <strong>Schachengine</strong>
+                <strong>{tr('Schachengine')}</strong>
                 <small>
-                  {engineCached ? 'Offline bereit · 1,9 MB' : 'Stockfish 19 · etwa 1,9 MB'}
+                  {engineCached
+                    ? tr('Offline bereit \u00B7 1,9 MB')
+                    : tr('Stockfish 19 \u00B7 etwa 1,9 MB')}
                 </small>
               </span>
               <button
@@ -402,20 +296,23 @@ export default function Profile() {
                 disabled={busy}
                 onClick={() => void offline('engine')}
               >
-                {engineCached ? 'Neu laden' : 'Herunterladen'}
+                {engineCached ? tr('Neu laden') : tr('Herunterladen')}
               </button>
             </div>
             <div className="offline-item">
               <span>
-                <strong>Alle 1.001 Aufgaben</strong>
-                <small>{puzzlesCached} von 21 Paketen offline</small>
+                <strong>{tr('Alle 1.001 Aufgaben')}</strong>
+                <small>
+                  {puzzlesCached}
+                  {tr(' von 21 Paketen offline')}
+                </small>
               </span>
               <button
                 className="button secondary"
                 disabled={busy}
                 onClick={() => void offline('puzzles')}
               >
-                Herunterladen
+                {tr('Herunterladen')}
               </button>
             </div>
             {progress && <p role="status">{progress}</p>}
@@ -433,7 +330,7 @@ export default function Profile() {
                 }, 'Dauerhafter lokaler Speicher angefragt und freigegeben.')
               }
             >
-              Browser um dauerhaften Speicher bitten
+              {tr('Browser um dauerhaften Speicher bitten')}
             </button>
             <button
               className="text-button"
@@ -451,13 +348,13 @@ export default function Profile() {
                 }, 'Offlinepakete entfernt. Dein Trainingsfortschritt bleibt gespeichert.')
               }
             >
-              Offlinepakete entfernen
+              {tr('Offlinepakete entfernen')}
             </button>
           </div>
           {updateWaiting && (
             <div className="update-note">
-              <h3>Eine neue Version ist verfügbar.</h3>
-              <p>Laufende Partien werden vor dem Update pausiert und gespeichert.</p>
+              <h3>{tr('Eine neue Version ist verf\u00FCgbar.')}</h3>
+              <p>{tr('Laufende Partien werden vor dem Update pausiert und gespeichert.')}</p>
               <button
                 className="button secondary"
                 disabled={busy}
@@ -478,7 +375,7 @@ export default function Profile() {
                   }, 'Update wird aktiviert.')
                 }
               >
-                Gespeichert aktualisieren
+                {tr('Gespeichert aktualisieren')}
               </button>
             </div>
           )}
@@ -487,13 +384,14 @@ export default function Profile() {
           <div className="panel-top">
             <h2>
               <HardDrive size={19} />
-              Deine Daten sichern
+              {tr('Deine Daten sichern')}
             </h2>
-            <span className="tag">VERSION 1</span>
+            <span className="tag">{tr('VERSION 1')}</span>
           </div>
           <p>
-            Exportiere dein aktuelles Profil mit Partien, Puzzleversuchen, Lektionen und Analysen.
-            Die Datei enthält keine Passwörter oder Sitzungsschlüssel.
+            {tr(
+              'Exportiere dein aktuelles Profil mit Partien, Puzzleversuchen, Lektionen und Analysen. Die Datei enth\u00E4lt keine Passw\u00F6rter oder Sitzungsschl\u00FCssel.',
+            )}
           </p>
           <button
             className="button secondary full"
@@ -510,11 +408,11 @@ export default function Profile() {
             }
           >
             <Download size={16} />
-            JSON-Backup herunterladen
+            {tr('JSON-Backup herunterladen')}
           </button>
           <label className="button secondary full file-button">
             <Upload size={16} />
-            JSON-Backup importieren
+            {tr('JSON-Backup importieren')}
             <input
               type="file"
               accept=".json"
@@ -538,61 +436,67 @@ export default function Profile() {
             />
           </label>
           <p className="small-text">
-            Importe werden über stabile IDs zusammengeführt. Bei denselben IDs gilt der neuere
-            Änderungszeitpunkt. Bei einem Zeitgleichstand entscheidet die Geräte-ID.
+            {tr(
+              'Importe werden \u00FCber stabile IDs zusammengef\u00FChrt. Bei denselben IDs gilt der neuere \u00C4nderungszeitpunkt. Bei einem Zeitgleichstand entscheidet die Ger\u00E4te-ID.',
+            )}
           </p>
           <details>
-            <summary>Was wird gespeichert?</summary>
+            <summary>{tr('Was wird gespeichert?')}</summary>
             <p>
-              Puzzleversuche, Ergebnisse, Hilfen, Zeit, Lektionen, Partien mit Zuggeschichte und
-              Uhren, Analysen, eigene Fehlerstellungen und Einstellungen. Kontodaten anderer Nutzer
-              sind auf diesem Gerät getrennt. Der Service Worker speichert nur öffentliche
-              App-Dateien und Puzzlepakete.
+              {tr(
+                'Puzzleversuche, Ergebnisse, Hilfen, Zeit, Lektionen, Partien mit Zuggeschichte und Uhren, Analysen, eigene Fehlerstellungen und Einstellungen. Kontodaten anderer Nutzer sind auf diesem Ger\u00E4t getrennt. Der Service Worker speichert nur \u00F6ffentliche App-Dateien und Puzzlepakete.',
+              )}
             </p>
           </details>
           <a href="/engine/COPYING.txt" className="text-button" target="_blank" rel="noreferrer">
-            Stockfish · GPL-3.0-Lizenz
+            {tr('Stockfish \u00B7 GPL-3.0-Lizenz')}
           </a>
           <a href="/engine/source.tar.gz" className="text-button" download>
-            Stockfish · zugehöriger Quellcode
+            {tr('Stockfish \u00B7 zugeh\u00F6riger Quellcode')}
           </a>
         </section>
       </div>
-      {error && <ErrorText>{error}</ErrorText>}
+      {error && <ErrorText>{tr(error)}</ErrorText>}
       {message && (
         <div className="notice" role="status">
-          {message}
+          {tr(message)}
         </div>
       )}
       {instructions && (
-        <Modal title="OLYMPION installieren" onClose={() => setInstructions(false)}>
+        <Modal title={tr('OLYMPION installieren')} onClose={() => setInstructions(false)}>
           <p>
-            <strong>iPhone oder iPad:</strong> Öffne diese Website im Browser. Tippe auf „Teilen“
-            oder das Browsermenü und dann auf „Zum Home-Bildschirm“. In Safari findest du „Teilen“
-            als Quadrat mit Pfeil nach oben.
+            <strong>{tr('iPhone oder iPad:')}</strong>
+            {tr(
+              ' \u00D6ffne diese Website im Browser. Tippe auf \u201ETeilen\u201C oder das Browsermen\u00FC und dann auf \u201EZum Home-Bildschirm\u201C. In Safari findest du \u201ETeilen\u201C als Quadrat mit Pfeil nach oben.',
+            )}
           </p>
           <p>
-            <strong>Android, Windows oder Mac:</strong> Nutze „App installieren“ im Browsermenü oder
-            das Installationssymbol in der Adressleiste, falls angeboten.
+            <strong>{tr('Android, Windows oder Mac:')}</strong>
+            {tr(
+              ' Nutze \u201EApp installieren\u201C im Browsermen\u00FC oder das Installationssymbol in der Adressleiste, falls angeboten.',
+            )}
           </p>
           <p>
-            Die genaue Option hängt vom Browser ab. Die Website bleibt auch ohne Installation
-            nutzbar.
+            {tr(
+              'Die genaue Option h\u00E4ngt vom Browser ab. Die Website bleibt auch ohne Installation nutzbar.',
+            )}
           </p>
           <button className="button primary" onClick={() => setInstructions(false)}>
-            Verstanden
+            {tr('Verstanden')}
           </button>
         </Modal>
       )}
       {backup && (
-        <Modal title="Backup in dieses Profil importieren?" onClose={() => setBackup(null)}>
+        <Modal title={tr('Backup in dieses Profil importieren?')} onClose={() => setBackup(null)}>
           <p>
-            {backup.length} geprüfte Einträge werden mit dem aktuellen{' '}
-            {user ? 'Konto' : 'Gastprofil'} zusammengeführt.
+            {backup.length}
+            {tr(' gepr\u00FCfte Eintr\u00E4ge werden mit dem aktuellen')}{' '}
+            {user ? tr('Konto') : tr('Gastprofil')}
+            {tr(' zusammengef\u00FChrt.')}
           </p>
           <div className="button-row">
             <button className="button secondary" onClick={() => setBackup(null)}>
-              Abbrechen
+              {tr('Abbrechen')}
             </button>
             <button
               className="button primary"
@@ -604,7 +508,7 @@ export default function Profile() {
                 }, 'Backup importiert.')
               }
             >
-              Importieren
+              {tr('Importieren')}
             </button>
           </div>
         </Modal>

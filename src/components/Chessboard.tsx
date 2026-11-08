@@ -1,9 +1,11 @@
 'use client';
+import { useT } from '@/lib/i18n';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Chess, type Color, type PieceSymbol, type Square } from 'chess.js';
 import { useStore } from './Provider';
 import { moveSound } from '@/lib/sound';
 import { Modal } from './Common';
+import { possiblePremove } from '@/lib/premove';
 export function Piece({ type, color }: { type: PieceSymbol; color: Color }) {
   const dark = color === 'b';
   return (
@@ -78,6 +80,10 @@ interface Props {
   lastMove?: string;
   arrow?: string;
   label?: string;
+  premoveColor?: Color;
+  onPremove?: (move: string) => void;
+  queuedMove?: string;
+  cancelPremove?: () => void;
 }
 export default function Chessboard({
   fen,
@@ -87,16 +93,34 @@ export default function Chessboard({
   lastMove,
   arrow,
   label = 'Schachbrett',
+  premoveColor,
+  onPremove,
+  queuedMove,
+  cancelPremove,
 }: Props) {
+  const tr = useT();
   const { settings } = useStore();
   const game = useMemo(() => new Chess(fen), [fen]);
+  const queuing = Boolean(premoveColor && game.turn() !== premoveColor && onPremove);
+  const activeColor = queuing ? premoveColor! : game.turn();
   const [selected, setSelected] = useState<Square | null>(null),
-    [promotion, setPromotion] = useState<{ from: Square; to: Square } | null>(null),
-    [drag, setDrag] = useState<{ piece: PieceSymbol; color: Color; x: number; y: number } | null>(
-      null,
-    );
+    [promotion, setPromotion] = useState<{
+      from: Square;
+      to: Square;
+    } | null>(null),
+    [drag, setDrag] = useState<{
+      piece: PieceSymbol;
+      color: Color;
+      x: number;
+      y: number;
+    } | null>(null);
   const root = useRef<HTMLDivElement>(null),
-    pointer = useRef<{ from: Square; x: number; y: number; moved: boolean } | null>(null),
+    pointer = useRef<{
+      from: Square;
+      x: number;
+      y: number;
+      moved: boolean;
+    } | null>(null),
     skipClick = useRef(false);
   const marker = useId().replace(/:/g, '');
   useEffect(() => {
@@ -105,11 +129,26 @@ export default function Chessboard({
     setDrag(null);
     pointer.current = null;
   }, [fen]);
-  const legal = selected ? game.moves({ square: selected, verbose: true }) : [];
+  const legal = selected && !queuing ? game.moves({ square: selected, verbose: true }) : [];
   const files = orientation === 'w' ? 'abcdefgh' : 'hgfedcba',
     ranks = orientation === 'w' ? '87654321' : '12345678';
   const attempt = (from: Square, to: Square) => {
     if (disabled || !onMove) return;
+    if (queuing) {
+      const piece = game.get(from);
+      const promotes = piece?.type === 'p' && to[1] === (activeColor === 'w' ? '8' : '1');
+      if (!possiblePremove(fen, from + to + (promotes ? 'q' : ''), activeColor)) {
+        setSelected(game.get(to)?.color === activeColor ? to : null);
+        return;
+      }
+      if (promotes) {
+        setPromotion({ from, to });
+        return;
+      }
+      onPremove?.(from + to);
+      setSelected(null);
+      return;
+    }
     const choices = game.moves({ square: from, verbose: true }).filter((m) => m.to === to);
     if (!choices.length) {
       setSelected(game.get(to)?.color === game.turn() ? to : null);
@@ -130,7 +169,7 @@ export default function Chessboard({
     }
     if (disabled || !onMove) return;
     if (selected && selected !== sq) attempt(selected, sq);
-    else setSelected(game.get(sq)?.color === game.turn() ? (selected === sq ? null : sq) : null);
+    else setSelected(game.get(sq)?.color === activeColor ? (selected === sq ? null : sq) : null);
   };
   function point(square: string) {
     return { x: files.indexOf(square[0]) * 12.5 + 6.25, y: ranks.indexOf(square[1]) * 12.5 + 6.25 };
@@ -145,7 +184,13 @@ export default function Chessboard({
         ref={root}
         className="chessboard"
         role="grid"
-        aria-label={label}
+        aria-label={tr(label)}
+        onContextMenu={(e) => {
+          if (cancelPremove && queuedMove) {
+            e.preventDefault();
+            cancelPremove();
+          }
+        }}
         onPointerMove={(e) => {
           const p = pointer.current;
           if (!p || disabled) return;
@@ -186,12 +231,12 @@ export default function Chessboard({
                 key={sq}
                 role="gridcell"
                 data-square={sq}
-                aria-label={`${sq}${piece ? ', ' + (piece.color === 'w' ? 'Weiß: ' : 'Schwarz: ') + names[piece.type] : ', leer'}${possible ? ', möglicher Zug' : ''}`}
+                aria-label={`${sq}${piece ? ', ' + (piece.color === 'w' ? tr('Weiß') + ': ' : tr('Schwarz') + ': ') + tr(names[piece.type]) : ', ' + tr('leer')}${possible ? ', ' + tr('möglicher Zug') : ''}`}
                 aria-selected={selected === sq}
-                className={`square ${dark ? 'dark' : 'light'} ${selected === sq ? 'selected' : ''} ${last ? 'last' : ''} ${check ? 'check' : ''}`}
+                className={`square ${dark ? 'dark' : 'light'} ${selected === sq ? 'selected' : ''} ${last ? 'last' : ''} ${check ? 'check' : ''} ${queuedMove && (queuedMove.slice(0, 2) === sq || queuedMove.slice(2, 4) === sq) ? 'premove-square' : ''}`}
                 onClick={() => click(sq)}
                 onPointerDown={(e) => {
-                  if (e.button !== 0 || disabled || !onMove || piece?.color !== game.turn()) return;
+                  if (e.button !== 0 || disabled || !onMove || piece?.color !== activeColor) return;
                   pointer.current = { from: sq, x: e.clientX, y: e.clientY, moved: false };
                   e.currentTarget.setPointerCapture(e.pointerId);
                 }}
@@ -208,7 +253,10 @@ export default function Chessboard({
                       root.current!.querySelectorAll<HTMLButtonElement>('[data-square]');
                     buttons[Math.max(0, Math.min(63, y * 8 + x + delta))]?.focus();
                   }
-                  if (e.key === 'Escape') setSelected(null);
+                  if (e.key === 'Escape') {
+                    setSelected(null);
+                    cancelPremove?.();
+                  }
                 }}
               >
                 {settings.coordinates && x === 0 && <span className="rank">{rank}</span>}
@@ -252,28 +300,28 @@ export default function Chessboard({
         </div>
       )}
       {promotion && (
-        <Modal title="Bauernumwandlung" onClose={() => setPromotion(null)}>
-          <strong>In welche Figur umwandeln?</strong>
+        <Modal title={tr('Bauernumwandlung')} onClose={() => setPromotion(null)}>
+          <strong>{tr('In welche Figur umwandeln?')}</strong>
           <div className="button-row">
             {(['q', 'r', 'b', 'n'] as PieceSymbol[]).map((t) => (
               <button
                 key={t}
                 autoFocus={t === 'q'}
                 className="promotion-option"
-                aria-label={names[t]}
+                aria-label={tr(names[t])}
                 onClick={() => {
                   if (settings.sound) moveSound();
-                  onMove?.(promotion.from + promotion.to + t);
+                  (queuing ? onPremove : onMove)?.(promotion.from + promotion.to + t);
                   setPromotion(null);
                   setSelected(null);
                 }}
               >
-                <Piece type={t} color={game.turn()} />
+                <Piece type={t} color={activeColor} />
               </button>
             ))}
           </div>
           <button className="text-button" onClick={() => setPromotion(null)}>
-            Abbrechen
+            {tr('Abbrechen')}
           </button>
         </Modal>
       )}

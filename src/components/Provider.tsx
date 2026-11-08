@@ -1,7 +1,8 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import type { Kind, RecordItem, Settings } from '@/lib/types';
+import type { Kind, RecordItem, Settings, PlayerProfile } from '@/lib/types';
+import { getPlayerProfile, rankedRequest } from '@/lib/account';
 import { DEFAULT_SETTINGS } from '@/lib/types';
 import { deviceId, loadRecords, saveRecords, mergeRecords } from '@/lib/storage';
 import { cloud, syncRecords } from '@/lib/cloud';
@@ -17,6 +18,11 @@ interface ContextValue {
   putMany: (rs: RecordItem[]) => Promise<void>;
   sync: () => Promise<void>;
   importGuest: () => Promise<void>;
+  profile: PlayerProfile | null;
+  refreshProfile: () => Promise<void>;
+  rewardPuzzle: (puzzleId: string, solution: string[]) => Promise<number>;
+  recovering: boolean;
+  setRecovering: (v: boolean) => void;
 }
 const Context = createContext<ContextValue | null>(null);
 let lastTimestamp = 0;
@@ -30,6 +36,8 @@ export function useStore() {
 }
 export default function Provider({ children }: { children: React.ReactNode }) {
   const [records, setRecords] = useState<RecordItem[]>([]),
+    [profile, setProfile] = useState<PlayerProfile | null>(null),
+    [recovering, setRecovering] = useState(false),
     [user, setUser] = useState<User | null>(null),
     [ready, setReady] = useState(false),
     [authReady, setAuthReady] = useState(false),
@@ -46,17 +54,27 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       return;
     }
     let active = true;
-    client.auth.getSession().then(({ data, error }) => {
-      if (active) {
-        setUser(data.session?.user || null);
-        setAuthReady(true);
-        if (error) setError(error.message);
-      }
-    });
-    const { data } = client.auth.onAuthStateChange((_event, session) => {
+    client.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (active) {
+          setUser(data.session?.user || null);
+          setAuthReady(true);
+          if (error) setError(error.message);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setAuthReady(true);
+          setError('Deine Anmeldung konnte nicht geladen werden. Bitte prüfe deine Verbindung.');
+        }
+      });
+    const { data } = client.auth.onAuthStateChange((event, session) => {
       if (active) {
         setUser(session?.user || null);
         setAuthReady(true);
+        if (event === 'PASSWORD_RECOVERY') setRecovering(true);
+        if (event === 'SIGNED_OUT') setRecovering(false);
       }
     });
     return () => {
@@ -64,6 +82,32 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       data.subscription.unsubscribe();
     };
   }, []);
+  const refreshProfile = useCallback(async () => {
+    if (!user) {
+      setProfile(null);
+      return;
+    }
+    const id = user.id;
+    const next = await getPlayerProfile();
+    if (ownerRef.current === id) setProfile(next);
+  }, [user]);
+  useEffect(() => {
+    setProfile(null);
+    if (user) void refreshProfile().catch(() => undefined);
+  }, [user, refreshProfile]);
+  const rewardPuzzle = useCallback(
+    async (puzzleId: string, solution: string[]) => {
+      if (!user || !navigator.onLine) return 0;
+      const result = await rankedRequest<{ earned: number }>({
+        action: 'puzzle',
+        puzzleId,
+        solution,
+      });
+      await refreshProfile();
+      return result.earned;
+    },
+    [user, refreshProfile],
+  );
   useEffect(() => {
     if (!authReady) return;
     let cancelled = false;
@@ -152,6 +196,22 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     ...DEFAULT_SETTINGS,
     ...((records.find((r) => r.id === 'settings')?.value as Partial<Settings>) || {}),
   };
+  useEffect(() => {
+    if (!ready) return;
+    document.documentElement.dataset.theme = settings.theme;
+    document.documentElement.lang = settings.language;
+    document.title =
+      settings.language === 'en' ? 'OLYMPION — The Chess Academy' : 'OLYMPION — Die Schachakademie';
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', settings.theme === 'light' ? '#f5f5f5' : '#0b0b0d');
+    try {
+      localStorage.setItem(
+        'olympion-display',
+        JSON.stringify({ theme: settings.theme, language: settings.language }),
+      );
+    } catch {}
+  }, [ready, settings.theme, settings.language]);
   return (
     <Context.Provider
       value={{
@@ -166,6 +226,11 @@ export default function Provider({ children }: { children: React.ReactNode }) {
         putMany,
         sync,
         importGuest,
+        profile,
+        refreshProfile,
+        rewardPuzzle,
+        recovering,
+        setRecovering,
       }}
     >
       {children}

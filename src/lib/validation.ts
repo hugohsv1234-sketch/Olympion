@@ -79,7 +79,15 @@ export function validPayload(kind: string, input: unknown) {
     return (
       text(p.name, 60) &&
       [10, 20, 30].includes(p.goal as number) &&
-      ['sound', 'motion', 'coordinates', 'contrast'].every((k) => typeof p[k] === 'boolean')
+      ['sound', 'motion', 'coordinates', 'contrast'].every((k) => typeof p[k] === 'boolean') &&
+      (p.theme === undefined || ['dark', 'light'].includes(p.theme as string)) &&
+      (p.language === undefined || ['de', 'en'].includes(p.language as string)) &&
+      (p.premoves === undefined || typeof p.premoves === 'boolean') &&
+      (p.liveAnalysis === undefined || typeof p.liveAnalysis === 'boolean') &&
+      (p.avatar === undefined ||
+        (typeof p.avatar === 'string' &&
+          p.avatar.length <= 200100 &&
+          /^data:image\/webp;base64,[A-Za-z0-9+/]+=*$/.test(p.avatar)))
     );
   if (kind === 'attempt')
     return (
@@ -109,6 +117,8 @@ export function validPayload(kind: string, input: unknown) {
       (p.turnStarted === null || number(p.turnStarted)) &&
       typeof p.paused === 'boolean' &&
       typeof p.live === 'boolean' &&
+      (p.rankedId === undefined ||
+        (typeof p.rankedId === 'string' && /^[0-9a-f-]{36}$/.test(p.rankedId))) &&
       number(p.assists, 0, 100000) &&
       number(p.createdAt) &&
       number(p.updatedAt) &&

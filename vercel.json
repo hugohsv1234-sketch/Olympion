@@ -5,6 +5,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": "out",
   "cleanUrls": true,
+  "functions": {
+    "api/ranking.ts": {
+      "maxDuration": 60,
+      "includeFiles": "{public/puzzles/**,node_modules/stockfish/package.json,node_modules/stockfish/bin/stockfish-19-lite-single.*}"
+    }
+  },
   "headers": [
     {
       "source": "/engine/(.*)",

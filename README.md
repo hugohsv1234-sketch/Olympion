@@ -124,3 +124,9 @@ Siehe `ASSET_CREDITS.md`, `LICENSE`, `THIRD_PARTY_NOTICES.md` und `docs/METRICS.
 - Bei einem harten Browserabbruch wird eine Trainingspartie beim Wiederöffnen mit dem letzten gespeicherten Uhrstand pausiert. Sichtbarer App-Wechsel speichert vorher den aktuellen Zeitstand.
 - Parallele Änderungen desselben Datensatzes verwenden Last-Write-Wins mit Zeitstempel und Geräte-ID. Unabhängige Versuche/Partien haben eigene UUIDs. Zwei Geräte sollten dieselbe laufende Partie nicht gleichzeitig bearbeiten. Die Oberfläche bleibt bei Syncfehlern lokal nutzbar.
 - Kein kommerzieller Livebetrieb, keine echte iPhone-/iPad-Hardware und keine aktiven Supabase-Konten werden durch die Projektprüfung ersetzt.
+
+## Profile, All-Time-Elo und Darstellung
+
+OLYMPION enthält ein Profil mit Bild-Upload, E-Mail/Passwort-Anmeldung samt Bestätigung und Reset, vorbereitete Google-/Apple-/Samsung-Anmeldung sowie eine öffentliche All-Time-Rangliste. Für echte Online-Konten müssen Supabase, SMTP und die jeweiligen OAuth-Anbieter verbunden und getestet sein; Einrichtung: [docs/ACCOUNTS.md](docs/ACCOUNTS.md). Nicht freigeschaltete Anmeldeanbieter werden deaktiviert angezeigt.
+
+Jedes neue gelöste Puzzle gibt einen Elo-Punkt, ein Botsieg je nach Stufe drei bis zwanzig. Die öffentliche Wertung stammt aus serverseitig bestätigten Erfolgen. Die bisherigen Puzzle-Schwierigkeitswerte bleiben separat. Neu sind außerdem ein heller Modus, Deutsch/English, einstellbare Premoves und abschaltbare Zugbewertung nach dem eigenen Zug.

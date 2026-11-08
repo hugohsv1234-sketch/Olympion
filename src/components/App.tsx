@@ -9,6 +9,7 @@ const Puzzles = dynamic(() => import('./Puzzles'), { loading: () => <Loading /> 
 const Arena = dynamic(() => import('./Arena'), { loading: () => <Loading /> });
 const Analysis = dynamic(() => import('./Analysis'), { loading: () => <Loading /> });
 const Academy = dynamic(() => import('./Academy'), { loading: () => <Loading /> });
+const Leaderboard = dynamic(() => import('./Leaderboard'), { loading: () => <Loading /> });
 const Profile = dynamic(() => import('./Profile'), { loading: () => <Loading /> });
 export default function App({ section }: { section: Section }) {
   return (
@@ -28,6 +29,8 @@ export default function App({ section }: { section: Section }) {
           <Academy />
         ) : section === 'fortschritt' ? (
           <Progress />
+        ) : section === 'rangliste' ? (
+          <Leaderboard />
         ) : (
           <Profile />
         )}

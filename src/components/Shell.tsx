@@ -1,4 +1,5 @@
 'use client';
+import { useT } from '@/lib/i18n';
 import { uuid } from '@/lib/id';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -18,7 +19,12 @@ import {
   X,
   WifiOff,
   Puzzle,
+  Trophy,
+  Moon,
+  Sun,
 } from 'lucide-react';
+import { avatarUrl } from '@/lib/account';
+import { lifetimeScore } from '@/lib/elo';
 import type { Section } from '@/lib/types';
 import { useStore } from './Provider';
 import { Logo } from './Common';
@@ -41,6 +47,13 @@ const nav = [
     href: '/puzzles',
   },
   { id: 'arena', name: 'Die Arena', sub: 'Spiele gegen die Götter', icon: Swords, href: '/arena' },
+  {
+    id: 'rangliste',
+    name: 'Die Rangliste',
+    sub: 'Dein Platz auf dem Olymp',
+    icon: Trophy,
+    href: '/rangliste',
+  },
   {
     id: 'analyse',
     name: 'Partieanalyse',
@@ -70,7 +83,11 @@ export default function Shell({
   section: Section;
   children: React.ReactNode;
 }) {
-  const { records, settings, user, status, error, setError, put } = useStore();
+  const tr = useT();
+  const { records, settings, user, profile, status, error, setError, put } = useStore();
+  const playerName = profile?.display_name || settings.name;
+  const picture = avatarUrl(profile, settings.avatar);
+  const elo = user ? profile?.elo || 0 : lifetimeScore(records).elo;
   const [menu, setMenu] = useState(false),
     [online, setOnline] = useState(true);
   const sessions = useRef({ id: '', seconds: 0, last: 0 });
@@ -121,18 +138,19 @@ export default function Shell({
   return (
     <div className={'app ' + (!settings.motion ? 'no-motion' : '')}>
       <a className="skip-link" href="#content">
-        Zum Inhalt springen
+        {tr('Zum Inhalt springen')}
       </a>
       <aside className={'sidebar ' + (menu ? 'is-open' : '')}>
         <Link className="brand" href="/" onClick={() => setMenu(false)}>
           <Logo />
           <span>
-            OLYMPION<small>DIE SCHACHAKADEMIE</small>
+            {tr('OLYMPION')}
+            <small>{tr('DIE SCHACHAKADEMIE')}</small>
           </span>
         </Link>
         <div className="sidebar-line" />
-        <span className="nav-label">DEIN WEG ZUM OLYMP</span>
-        <nav aria-label="Hauptnavigation">
+        <span className="nav-label">{tr('DEIN WEG ZUM OLYMP')}</span>
+        <nav aria-label={tr('Hauptnavigation')}>
           {nav.map((n) => (
             <Link
               key={n.id}
@@ -143,8 +161,8 @@ export default function Shell({
             >
               <n.icon size={19} />
               <span>
-                {n.name}
-                <small>{n.sub}</small>
+                {tr(n.name)}
+                <small>{tr(n.sub)}</small>
               </span>
               {section === n.id && <span className="active-mark" />}
             </Link>
@@ -153,14 +171,20 @@ export default function Shell({
         <div className="sidebar-bottom">
           <div className="quote">
             <Columns3 size={21} />
-            <p>„Der Anfang ist die Hälfte des Ganzen.“</p>
-            <span>ARISTOTELES</span>
+            <p>{tr('\u201EDer Anfang ist die H\u00E4lfte des Ganzen.\u201C')}</p>
+            <span>{tr('ARISTOTELES')}</span>
           </div>
           <Link href="/profil" className={'profile-link ' + (section === 'profil' ? 'active' : '')}>
-            <span className="avatar">{(settings.name || 'G')[0].toUpperCase()}</span>
+            <span className="avatar">
+              {picture ? (
+                <img src={picture} alt="" width="36" height="36" />
+              ) : (
+                (playerName || 'G')[0].toUpperCase()
+              )}
+            </span>
             <span>
-              {settings.name || 'Gast'}
-              <small>{user ? 'Konto verbunden' : 'Lokales Gastprofil'}</small>
+              {playerName || 'Gast'}
+              <small>{user ? tr('Konto verbunden') : tr('Lokales Gastprofil')}</small>
             </span>
             <CircleUserRound size={17} />
           </Link>
@@ -170,7 +194,7 @@ export default function Shell({
         <button
           className="nav-backdrop"
           onClick={() => setMenu(false)}
-          aria-label="Menü schließen"
+          aria-label={tr('Men\u00FC schlie\u00DFen')}
         />
       )}
       <div className="workspace">
@@ -179,42 +203,72 @@ export default function Shell({
             <button
               className="icon-button mobile-menu"
               onClick={() => setMenu(!menu)}
-              aria-label={menu ? 'Menü schließen' : 'Menü öffnen'}
+              aria-label={menu ? tr('Men\u00FC schlie\u00DFen') : tr('Men\u00FC \u00F6ffnen')}
             >
               {menu ? <X size={22} /> : <Menu size={22} />}
             </button>
             <span className="breadcrumb">
-              OLYMPION <span>/</span>{' '}
-              {nav.find((n) => n.id === section)?.name || 'Profil & Einstellungen'}
+              {tr('OLYMPION ')}
+              <span>/</span>{' '}
+              {tr(nav.find((n) => n.id === section)?.name || 'Profil & Einstellungen')}
             </span>
           </div>
           <div className="topbar-right">
+            <Link href="/rangliste" className="top-elo" aria-label={'All-Time-Elo: ' + elo}>
+              <Trophy size={16} />
+              <strong key={elo} className="elo-counter">
+                {elo}
+              </strong>
+              <span>{tr('Elo')}</span>
+            </Link>
+            <button
+              className="icon-button theme-shortcut"
+              aria-label={
+                settings.theme === 'dark'
+                  ? tr('Hellen Modus aktivieren')
+                  : tr('Nachtmodus aktivieren')
+              }
+              onClick={() =>
+                void put('settings', 'settings', {
+                  ...settings,
+                  theme: settings.theme === 'dark' ? 'light' : 'dark',
+                })
+              }
+            >
+              {settings.theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
             {!online && (
               <span className="offline-label">
                 <WifiOff size={15} />
-                Offline
+                {tr('Offline')}
               </span>
             )}
             <span className="streak">
               <Flame size={17} />
               {streak(attemptsFrom(records))}
-              <span>{streak(attemptsFrom(records)) === 1 ? 'Tag in Folge' : 'Tage in Folge'}</span>
+              <span>
+                {streak(attemptsFrom(records)) === 1 ? tr('Tag in Folge') : tr('Tage in Folge')}
+              </span>
             </span>
             <Link href="/profil" className="top-install">
               <Download size={16} />
-              <span>App installieren</span>
+              <span>{tr('App installieren')}</span>
             </Link>
-            <Link className="top-avatar" href="/profil" aria-label="Profil öffnen">
-              {(settings.name || 'G')[0].toUpperCase()}
+            <Link className="top-avatar" href="/profil" aria-label={tr('Profil \u00F6ffnen')}>
+              {picture ? (
+                <img src={picture} alt="" width="36" height="36" />
+              ) : (
+                (playerName || 'G')[0].toUpperCase()
+              )}
             </Link>
           </div>
         </header>
         {error && (
           <div className="global-error" role="alert">
-            <span>{error}</span>
+            <span>{tr(error)}</span>
             <button
               className="icon-button"
-              aria-label="Meldung schließen"
+              aria-label={tr('Meldung schlie\u00DFen')}
               onClick={() => setError(null)}
             >
               <X size={18} />
@@ -227,15 +281,17 @@ export default function Shell({
         <footer className="footer">
           <span>
             <Logo />
-            OLYMPION <span>·</span> Jeder Zug ein Schritt.
+            {tr('OLYMPION ')}
+            <span>·</span>
+            {tr(' Jeder Zug ein Schritt.')}
           </span>
           <Link href="/profil">
-            {status}
+            {tr(status)}
             <ArrowUpRight size={12} />
           </Link>
         </footer>
       </div>
-      <nav className="bottom-nav" aria-label="Mobile Hauptnavigation">
+      <nav className="bottom-nav" aria-label={tr('Mobile Hauptnavigation')}>
         {[
           { href: '/training', id: 'training', name: 'Training', icon: Compass },
           { href: '/puzzles', id: 'puzzles', name: 'Puzzles', icon: Puzzle },
@@ -250,7 +306,7 @@ export default function Shell({
             aria-current={section === n.id ? 'page' : undefined}
           >
             <n.icon size={20} />
-            <span>{n.name}</span>
+            <span>{tr(n.name)}</span>
           </Link>
         ))}
       </nav>

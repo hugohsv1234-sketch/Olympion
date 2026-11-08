@@ -41,24 +41,9 @@ Das erstellt bei Bedarf eine eigene private Kopie. Für das vorhandene Repositor
 
 Der kleine Stockfish-Build wird in `postinstall` und erneut vor dem Build automatisch kopiert. Er kommt aus dem gepinnten npm-Paket mit Lockfile-Integrität. Große Multi-Thread- oder Full-Builds werden nicht veröffentlicht. WASM erhält vom statischen Host den MIME-Typ `application/wasm`; das auf der fertigen Adresse in den Entwicklerwerkzeugen prüfen.
 
-## 4. Optional Konten aktivieren
+## 4. Konten, E-Mail und öffentliche Rangliste aktivieren
 
-1. Eigenes Supabase-Projekt anlegen.
-2. Im SQL Editor den vollständigen Inhalt von `supabase/migrations/001_user_records.sql` **einmal** ausführen. Alternativ die Supabase CLI für Migrationen verwenden.
-3. In Supabase Auth E-Mail/Passwort-Anmeldung einschalten und gewünschte E-Mail-Bestätigung konfigurieren.
-4. Unter Auth → URL Configuration die Vercel-Produktionsadresse als Site URL eintragen. Erlaubte Redirect URL: `https://DEINE-DOMAIN/profil`; lokal zusätzlich `http://localhost:3000/profil`. Bei Previewdomains nur ausdrücklich verwendete Domains erlauben.
-5. In Vercel → Settings → Environment Variables folgende **öffentliche** Werte setzen:
-
-| Name                            | Wert                               |
-| ------------------------------- | ---------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Projekt-URL aus Supabase           |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Öffentlicher anon-/Publishable-Key |
-
-6. Für lokale Entwicklung `.env.example` nach `.env.local` kopieren und die beiden Beispielwerte ersetzen.
-7. Vercel neu bauen/deployen: Die öffentlichen Variablen werden beim Build eingebunden. Sie sind absichtlich im Browser sichtbar; **niemals** einen `service_role`- oder Secret-Key verwenden.
-8. Unter Profil registrieren, ggf. E-Mail bestätigen und anmelden. Die lokalen Gastdaten erst über **Gastdaten übernehmen** in das gewünschte Konto kopieren.
-
-Die Tabelle und der RPC verwenden die angemeldete Nutzer-ID aus dem JWT. Der Browser darf keine fremde Nutzer-ID an die Synchronisierung übergeben. RLS schützt Lesen und Schreiben; Trigger und RPC validieren Daten serverseitig. Das Schema hat keine öffentlich freigegebenen Tabellen.
+Die vollständige Einrichtung steht in [docs/ACCOUNTS.md](docs/ACCOUNTS.md). Beide Migrationen in `supabase/migrations/` anwenden, E-Mail-Bestätigung und SMTP einrichten, Anbieter freischalten und die Supabase-Werte auf Vercel setzen. Die Ranglisten-Function benötigt einen eigenen serverseitigen Schlüssel. Öffentlich sind Anzeigenamen, Avatare und Elo-Erfolge. Private Trainingsdatensätze bleiben durch RLS getrennt.
 
 ## 5. Abschließender Funktionstest
 

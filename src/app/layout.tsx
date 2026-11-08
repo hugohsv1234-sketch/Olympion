@@ -16,8 +16,16 @@ export const viewport: Viewport = {
 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de">
-      <body>{children}</body>
+    <html lang="de" suppressHydrationWarning>
+      <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var d=JSON.parse(localStorage.getItem('olympion-display')||'{}');if(d.theme==='light'||d.theme==='dark')document.documentElement.dataset.theme=d.theme;if(d.language==='de'||d.language==='en')document.documentElement.lang=d.language}catch(e){}",
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

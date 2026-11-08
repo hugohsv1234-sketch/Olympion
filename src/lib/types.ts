@@ -7,6 +7,7 @@ export type Section =
   | 'analyse'
   | 'akademie'
   | 'fortschritt'
+  | 'rangliste'
   | 'profil';
 export type Kind =
   | 'settings'
@@ -32,6 +33,11 @@ export interface Settings {
   motion: boolean;
   coordinates: boolean;
   contrast: boolean;
+  theme: 'dark' | 'light';
+  language: 'de' | 'en';
+  premoves: boolean;
+  liveAnalysis: boolean;
+  avatar?: string;
 }
 export interface Puzzle {
   id: string;
@@ -71,6 +77,7 @@ export interface GameRecord {
   createdAt: number;
   updatedAt: number;
   live: boolean;
+  rankedId?: string;
 }
 export interface Position {
   initialFen: string;
@@ -166,4 +173,20 @@ export const DEFAULT_SETTINGS: Settings = {
   motion: true,
   coordinates: true,
   contrast: false,
+  theme: 'dark',
+  language: 'de',
+  premoves: true,
+  liveAnalysis: true,
 };
+
+export interface PlayerProfile {
+  user_id: string;
+  display_name: string;
+  avatar_path: string | null;
+  elo: number;
+  puzzles_solved: number;
+  bots_won: number;
+  created_at: string;
+  updated_at?: string;
+  rank?: number;
+}

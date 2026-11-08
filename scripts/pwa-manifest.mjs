@@ -10,6 +10,7 @@ const core = [
   '/akademie',
   '/fortschritt',
   '/profil',
+  '/rangliste',
 ];
 async function walk(dir) {
   for (const item of await fs.readdir(dir, { withFileTypes: true })) {
