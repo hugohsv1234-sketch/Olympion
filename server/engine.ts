@@ -1,8 +1,8 @@
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
-import { UciEngine } from '../src/lib/engine';
-import { BOTS, pickCandidate } from '../src/lib/bots';
-import { restore } from '../src/lib/chess';
+import { UciEngine } from '../src/lib/engine.js';
+import { BOTS, pickCandidate } from '../src/lib/bots.js';
+import { restore } from '../src/lib/chess.js';
 import type { Position } from '../src/lib/types';
 export function nodeEngineFactory() {
   const child = spawn(
