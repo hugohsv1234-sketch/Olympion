@@ -4,7 +4,7 @@
   --accent: #20e0cd;
   --accent-deep: #075b63;
   --sequence-duration: 3.5s;
-  position: fixed;
+  position: absolute;
   z-index: 20;
   inset: 74px 0 0;
   pointer-events: none;

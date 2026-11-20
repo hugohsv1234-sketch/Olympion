@@ -686,15 +686,6 @@ export default function Analysis() {
               </div>
             </div>
           )}
-          {!variation.length && (celebration?.result || selected) && (
-            <MoveCelebration
-              key={`${model.id}:${budget}:${cursor}:${celebration?.nonce ?? 0}:${(celebration?.result || selected)!.grade}`}
-              result={(celebration?.result || selected)!}
-              motion={settings.motion}
-              boardRef={celebrationBoard}
-              orientation={orientation}
-            />
-          )}
           <div className="play-layout analysis-layout">
             <div className="board-column">
               <div className="evaluation-board">
@@ -713,6 +704,16 @@ export default function Analysis() {
                   </small>
                 </div>
                 <div ref={celebrationBoard} className="review-board-stage">
+                  {!variation.length && (celebration?.result || selected) && (
+                    <MoveCelebration
+                      key={`${model.id}:${budget}:${cursor}:${celebration?.nonce ?? 0}:${(celebration?.result || selected)!.grade}`}
+                      result={(celebration?.result || selected)!}
+                      motion={settings.motion}
+                      boardRef={celebrationBoard}
+                      orientation={orientation}
+                    />
+                  )}
+
                   <Chessboard
                     fen={chess.fen()}
                     orientation={orientation}
