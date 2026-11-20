@@ -2154,3 +2154,17 @@ body {
   border: 1px solid var(--line);
   box-shadow: none;
 }
+.classical-app .mission-row.done .mission-icon {
+  background: var(--panel-light);
+  color: var(--text);
+}
+.classical-app .avatar-edit {
+  background: var(--panel);
+  color: var(--text);
+  border-color: var(--line);
+}
+.classical-app [role='tab'][aria-selected='true'] {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
