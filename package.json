@@ -22,7 +22,7 @@
     "@supabase/supabase-js": "2.118.0",
     "chess.js": "1.4.0",
     "lucide-react": "0.468.0",
-    "next": "16.4.3",
+    "next": "16.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
@@ -33,7 +33,7 @@
     "@types/react-dom": "19.2.3",
     "esbuild": "0.27.7",
     "eslint": "9.39.1",
-    "eslint-config-next": "16.4.3",
+    "eslint-config-next": "16.4.6",
     "fake-indexeddb": "6.0.1",
     "prettier": "3.6.2",
     "stockfish": "19.0.1",
