@@ -78,6 +78,7 @@ export default function Analysis() {
   const celebrationNonce = useRef(0);
   const abort = useRef<AbortController | null>(null),
     root = useRef<HTMLDivElement>(null),
+    celebrationBoard = useRef<HTMLDivElement>(null),
     initialized = useRef(false),
     selection = useRef(0);
   const games = records
@@ -690,6 +691,8 @@ export default function Analysis() {
               key={`${model.id}:${budget}:${cursor}:${celebration?.nonce ?? 0}:${(celebration?.result || selected)!.grade}`}
               result={(celebration?.result || selected)!}
               motion={settings.motion}
+              boardRef={celebrationBoard}
+              orientation={orientation}
             />
           )}
           <div className="play-layout analysis-layout">
@@ -709,7 +712,7 @@ export default function Analysis() {
                         : '–'}
                   </small>
                 </div>
-                <div className="review-board-stage">
+                <div ref={celebrationBoard} className="review-board-stage">
                   <Chessboard
                     fen={chess.fen()}
                     orientation={orientation}

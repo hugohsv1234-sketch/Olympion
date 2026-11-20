@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import './classical.css';
+import './awards.css';
 export const metadata: Metadata = {
   title: 'OLYMPION — Die Schachakademie',
   description:

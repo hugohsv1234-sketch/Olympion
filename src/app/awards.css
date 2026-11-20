@@ -1,0 +1,1333 @@
+/* Animation artwork from the user-supplied OLYMPION Figma export.
+   Namespaced to preserve the existing academy interface. */
+.olympion-award.award-animation {
+  --accent: #20e0cd;
+  --accent-deep: #075b63;
+  --sequence-duration: 3.5s;
+  position: fixed;
+  z-index: 20;
+  inset: 74px 0 0;
+  pointer-events: none;
+}
+
+.olympion-award.award-animation--great {
+  --sequence-duration: 2.7s;
+}
+
+.olympion-award .stage-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.58);
+  opacity: 0;
+  animation: oly-dim-stage var(--sequence-duration) ease both;
+}
+
+.olympion-award .target-pulse {
+  position: absolute;
+  top: 53%;
+  left: 72%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #eaffff;
+  box-shadow:
+    0 0 12px 5px var(--accent),
+    0 0 36px 15px color-mix(in srgb, var(--accent) 45%, transparent);
+  animation: oly-target-pulse 0.65s ease-out both;
+}
+
+.olympion-award .award-lockup {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 430px;
+  height: 430px;
+  transform: translate(-50%, -50%);
+}
+
+.olympion-award .medallion-flight {
+  position: absolute;
+  z-index: 5;
+  top: 95px;
+  left: 125px;
+  width: 180px;
+  height: 180px;
+  transform-origin: center;
+  animation: oly-medallion-flight-brilliant 3.5s cubic-bezier(0.13, 0.83, 0.25, 1) both;
+}
+
+.olympion-award.award-animation--great .medallion-flight {
+  animation-name: oly-medallion-flight-great;
+  animation-duration: 2.7s;
+}
+
+.olympion-award .medallion {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.55));
+  animation: oly-medal-breathe 1.45s 1.2s ease-in-out infinite alternate;
+}
+
+.olympion-award .medallion-rim {
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 25deg,
+    #53585a,
+    #ecefea 12%,
+    #747b7c 25%,
+    #f9f8f2 43%,
+    #44494b 60%,
+    #d9deda 78%,
+    #666b6b
+  );
+  box-shadow:
+    inset 0 0 0 1px #f4f6f3,
+    inset 0 0 0 3px #505657,
+    0 0 0 1px #151718;
+}
+
+.olympion-award .medallion-stone {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid #171c1c;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.13), transparent 16%),
+    radial-gradient(
+      circle at 50% 45%,
+      color-mix(in srgb, var(--accent-deep) 36%, #111),
+      #080b0b 67%
+    ),
+    repeating-linear-gradient(125deg, transparent 0 16px, rgba(255, 255, 255, 0.018) 17px 18px);
+  box-shadow:
+    inset 0 0 24px #000,
+    inset 0 0 0 5px rgba(255, 255, 255, 0.04);
+}
+
+.olympion-award .medallion-stone::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 50%;
+}
+
+.olympion-award .medallion-shine {
+  position: absolute;
+  top: -40%;
+  left: -90%;
+  width: 60%;
+  height: 180%;
+  transform: rotate(25deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  animation: oly-shine-sweep 1s 0.7s ease-out both;
+}
+
+.olympion-award .medallion-symbol {
+  transform: translateY(-4px);
+  color: var(--accent);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 77px;
+  font-weight: 600;
+  letter-spacing: -0.12em;
+  line-height: 1;
+  text-indent: -0.12em;
+  text-shadow:
+    0 0 5px #fff,
+    0 0 14px var(--accent),
+    0 0 30px var(--accent);
+}
+
+.olympion-award.award-animation--great .medallion-symbol {
+  font-size: 91px;
+  text-indent: 0;
+}
+
+.olympion-award .medallion-greek {
+  position: absolute;
+  bottom: 25px;
+  color: color-mix(in srgb, var(--accent) 55%, white);
+  font-size: 5px;
+  letter-spacing: 0.42em;
+  opacity: 0.7;
+}
+
+.olympion-award .laurels {
+  position: absolute;
+  z-index: 3;
+  inset: 34px 5px 80px;
+  opacity: 0;
+  transform: scale(0.72);
+  animation:
+    oly-laurel-reveal 0.7s 0.63s cubic-bezier(0.2, 1.45, 0.5, 1) forwards,
+    oly-presentation-exit 0.3s 2.72s ease-in forwards;
+}
+
+.olympion-award.award-animation--great .laurels {
+  animation:
+    oly-laurel-reveal 0.56s 0.5s cubic-bezier(0.2, 1.45, 0.5, 1) forwards,
+    oly-presentation-exit 0.24s 1.98s ease-in forwards;
+}
+
+.olympion-award .laurel {
+  position: absolute;
+  top: 5px;
+  width: 104px;
+  height: 235px;
+}
+
+.olympion-award .laurel--left {
+  left: 46px;
+  transform: rotate(-11deg);
+}
+
+.olympion-award .laurel--right {
+  right: 46px;
+  transform: rotate(11deg) scaleX(-1);
+}
+
+.olympion-award .laurel-stem {
+  position: absolute;
+  bottom: 0;
+  left: 75px;
+  width: 1px;
+  height: 218px;
+  transform: rotate(14deg);
+  transform-origin: bottom;
+  background: linear-gradient(transparent, var(--accent));
+  opacity: 0.55;
+}
+
+.olympion-award .laurel-leaf {
+  --leaf: 0;
+  position: absolute;
+  left: calc(62px - var(--leaf) * 4px);
+  bottom: calc(17px + var(--leaf) * 22px);
+  width: 30px;
+  height: 11px;
+  transform: rotate(calc(-47deg + var(--leaf) * 4deg)) scale(0);
+  transform-origin: right center;
+  border: 1px solid color-mix(in srgb, var(--accent) 80%, white);
+  border-radius: 100% 0 100% 0;
+  background: linear-gradient(25deg, var(--accent-deep), var(--accent));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 25%, transparent);
+  animation: oly-leaf-grow 0.3s calc(0.75s + var(--leaf) * 0.045s) ease-out forwards;
+}
+
+.olympion-award .laurel-leaf--outer {
+  left: calc(72px - var(--leaf) * 4px);
+  transform: rotate(calc(37deg - var(--leaf) * 2deg)) scaleY(-1) scale(0);
+}
+
+.olympion-award .award-copy {
+  position: absolute;
+  z-index: 6;
+  top: 282px;
+  left: 50%;
+  width: 420px;
+  transform: translateX(-50%);
+  text-align: center;
+  animation: oly-presentation-exit 0.3s 2.68s ease-in forwards;
+}
+
+.olympion-award.award-animation--great .award-copy {
+  animation: oly-presentation-exit 0.24s 1.94s ease-in forwards;
+}
+
+.olympion-award .award-eyebrow {
+  display: block;
+  color: var(--accent);
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: oly-text-reveal 0.45s 1s ease-out forwards;
+}
+
+.olympion-award .award-copy h2 {
+  margin: 4px 0 5px;
+  color: #f5f1e7;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 45px;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: oly-title-reveal 0.65s 1.08s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.olympion-award .award-rule {
+  display: block;
+  width: 0;
+  height: 1px;
+  margin: 0 auto 9px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: oly-rule-grow 0.7s 1.38s ease-out forwards;
+}
+
+.olympion-award .award-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  opacity: 0;
+  animation: oly-text-reveal 0.6s 1.55s ease-out forwards;
+}
+
+.olympion-award .effects {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: 430px;
+  height: 430px;
+  transform: translate(-50%, -50%);
+}
+
+.olympion-award .arrival-ring {
+  position: absolute;
+  top: 182px;
+  left: 212px;
+  width: 4px;
+  height: 4px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+  animation: oly-ring-expand 0.75s 0.63s ease-out forwards;
+}
+
+.olympion-award .arrival-ring--two {
+  animation-delay: 0.72s;
+}
+
+.olympion-award .flight-trail {
+  position: absolute;
+  top: 230px;
+  left: 250px;
+  width: min(29vw, 390px);
+  height: 4px;
+  transform: rotate(var(--trail-angle, 20deg));
+  transform-origin: left;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    color-mix(in srgb, var(--accent) 35%, transparent),
+    transparent
+  );
+  box-shadow: 0 0 11px var(--accent);
+  filter: blur(0.3px);
+  opacity: 0;
+  animation: oly-trail 0.65s 0.16s ease-out forwards;
+}
+
+.olympion-award .orbit {
+  position: absolute;
+  border: 1px solid color-mix(in srgb, var(--accent) 65%, transparent);
+  border-radius: 50%;
+  opacity: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 42%, 0 72%);
+}
+
+.olympion-award .orbit--one {
+  inset: 54px;
+  transform: rotate(-18deg);
+  animation: oly-orbit-reveal 1.4s 0.68s ease-out forwards;
+}
+
+.olympion-award .orbit--two {
+  inset: 80px 38px;
+  transform: rotate(28deg);
+  animation: oly-orbit-reveal 1.2s 0.82s ease-out forwards reverse;
+}
+
+.olympion-award .spark {
+  position: absolute;
+  top: 190px;
+  left: 214px;
+  width: 2px;
+  height: 42px;
+  transform-origin: 50% 20px;
+  border-radius: 50%;
+  background: linear-gradient(#fff, var(--accent), transparent);
+  opacity: 0;
+}
+
+.olympion-award .spark--one {
+  animation: oly-spark-one 0.65s 0.66s ease-out forwards;
+}
+.olympion-award .spark--two {
+  animation: oly-spark-two 0.75s 0.69s ease-out forwards;
+}
+.olympion-award .spark--three {
+  animation: oly-spark-three 0.6s 0.72s ease-out forwards;
+}
+.olympion-award .spark--four {
+  animation: oly-spark-four 0.8s 0.69s ease-out forwards;
+}
+.olympion-award .spark--five {
+  animation: oly-spark-five 0.7s 0.75s ease-out forwards;
+}
+.olympion-award .spark--six {
+  animation: oly-spark-six 0.65s 0.71s ease-out forwards;
+}
+
+/* Zeus lightning choreography
+   BRILLANT — target arcs 0.05–0.48s; trail 0.20–0.78s; incoming bolts
+   0.48–0.82s; ring 0.72–1.34s; thunderbolt 1.02–1.72s; symbol arc
+   1.54–1.98s; energy return 2.82–3.50s.
+   GROSSARTIG — trail 0.14–0.58s; side strike 0.40–0.72s; half ring
+   0.62–1.12s; symbol impulse 1.30–1.65s; return 2.08–2.70s. */
+.olympion-award .target-electricity {
+  position: absolute;
+  z-index: 8;
+  top: calc(53% - 40px);
+  left: calc(72% - 60px);
+  width: 120px;
+  height: 80px;
+}
+
+.olympion-award .target-electricity svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  filter: drop-shadow(0 0 5px var(--accent));
+}
+
+.olympion-award .lightning-stage {
+  position: absolute;
+  z-index: 7;
+  top: 45%;
+  left: 50%;
+  width: 430px;
+  height: 430px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.olympion-award .lightning-stage svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.olympion-award .lightning-edge,
+.olympion-award .lightning-core {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: bevel;
+  vector-effect: non-scaling-stroke;
+}
+
+.olympion-award .lightning-edge {
+  stroke: var(--accent);
+  stroke-width: 7;
+  opacity: 0;
+  filter: url('#electric-glow') drop-shadow(0 0 8px var(--accent));
+}
+
+.olympion-award .lightning-core {
+  stroke: #f5ffff;
+  stroke-width: 1.7;
+  opacity: 0;
+  filter: drop-shadow(0 0 2px #fff);
+}
+
+.olympion-award .target-arc .lightning-edge,
+.olympion-award .target-arc .lightning-core,
+.olympion-award .main-bolt .lightning-edge,
+.olympion-award .main-bolt .lightning-core,
+.olympion-award .bolt-branches .lightning-edge,
+.olympion-award .bolt-branches .lightning-core,
+.olympion-award .symbol-electricity .lightning-edge,
+.olympion-award .symbol-electricity .lightning-core {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+}
+
+.olympion-award .target-arc .lightning-edge {
+  animation: oly-lightning-draw-edge 0.43s 0.05s ease-out both;
+}
+
+.olympion-award .target-arc .lightning-core {
+  animation: oly-lightning-draw-core 0.31s 0.05s ease-out both;
+}
+
+.olympion-award .target-arc--right .lightning-edge {
+  animation-delay: 0.09s;
+}
+
+.olympion-award .target-arc--right .lightning-core {
+  animation-delay: 0.09s;
+}
+
+.olympion-award .target-residue {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  transform: translate(-50%, -50%) scale(0.5);
+  border: 1px solid color-mix(in srgb, var(--accent) 65%, white);
+  border-radius: 50%;
+  background: #0a1111;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 65%, transparent);
+  color: var(--accent);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  font-weight: 600;
+  opacity: 0;
+  animation: oly-target-residue 0.42s 3.08s ease-out forwards;
+}
+
+.olympion-award.award-animation--great .target-residue {
+  animation-delay: 2.38s;
+}
+
+.olympion-award .main-bolt--side {
+  display: none;
+}
+
+.olympion-award .main-bolt .lightning-edge {
+  animation: oly-lightning-draw-edge 0.34s 0.48s ease-out both;
+}
+
+.olympion-award .main-bolt .lightning-core {
+  animation: oly-lightning-draw-core 0.25s 0.48s ease-out both;
+}
+
+.olympion-award .main-bolt--right .lightning-edge,
+.olympion-award .main-bolt--right .lightning-core {
+  animation-delay: 0.52s;
+}
+
+.olympion-award .branch {
+  stroke-width: 4;
+}
+
+.olympion-award .bolt-branches .lightning-edge {
+  animation: oly-lightning-draw-edge 0.31s 0.6s ease-out both;
+}
+
+.olympion-award .bolt-branches .lightning-core {
+  animation: oly-lightning-draw-core 0.21s 0.6s ease-out both;
+}
+
+.olympion-award .branch--two {
+  animation-delay: 0.65s !important;
+}
+
+.olympion-award .branch--three {
+  display: none;
+}
+
+.olympion-award .impact-flare {
+  position: absolute;
+  top: 184px;
+  left: 214px;
+  width: 18px;
+  height: 18px;
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 9px 3px #fff,
+    0 0 26px 9px var(--accent);
+  opacity: 0;
+  animation: oly-impact-flare 0.46s 0.68s ease-out both;
+}
+
+.olympion-award .metal-reflection {
+  position: absolute;
+  top: 89px;
+  left: 119px;
+  width: 192px;
+  height: 192px;
+  border: 3px solid transparent;
+  border-top-color: #fff;
+  border-right-color: var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+  filter: drop-shadow(0 0 5px var(--accent));
+  animation: oly-metal-reflection 0.62s 0.7s ease-out both;
+}
+
+.olympion-award .ring-electricity {
+  transform: rotate(-90deg);
+  transform-origin: 215px 185px;
+}
+
+.olympion-award .ring-electricity circle {
+  stroke-dasharray: 597;
+  stroke-dashoffset: 597;
+}
+
+.olympion-award .ring-electricity .lightning-edge {
+  animation: oly-ring-electric-edge 0.62s 0.72s ease-in-out both;
+}
+
+.olympion-award .ring-electricity .lightning-core {
+  animation: oly-ring-electric-core 0.48s 0.72s ease-in-out both;
+}
+
+.olympion-award .laurel-reflection {
+  position: absolute;
+  top: 72px;
+  width: 68px;
+  height: 220px;
+  border-radius: 50%;
+  opacity: 0;
+  filter: blur(7px);
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--accent) 50%, white),
+    transparent 68%
+  );
+}
+
+.olympion-award .laurel-reflection--left {
+  left: 47px;
+  animation: oly-laurel-light 0.44s 0.83s ease-out both;
+}
+
+.olympion-award .laurel-reflection--right {
+  right: 47px;
+  animation: oly-laurel-light 0.44s 1.01s ease-out both;
+}
+
+.olympion-award .thunderbolt-silhouette {
+  fill: color-mix(in srgb, var(--accent) 22%, transparent);
+  stroke: color-mix(in srgb, var(--accent) 78%, white);
+  stroke-width: 1.2;
+  opacity: 0;
+  filter: drop-shadow(0 0 12px var(--accent));
+  animation: oly-thunderbolt-reveal 0.7s 1.02s ease-in-out both;
+}
+
+.olympion-award .meander-detail {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: square;
+}
+
+.olympion-award .symbol-electricity .lightning-edge {
+  animation: oly-lightning-draw-edge 0.44s 1.54s ease-out both;
+}
+
+.olympion-award .symbol-electricity .lightning-core {
+  animation: oly-lightning-draw-core 0.3s 1.54s ease-out both;
+}
+
+.olympion-award .electric-flight-trail {
+  position: absolute;
+  top: 228px;
+  left: 244px;
+  width: min(35vw, 455px);
+  height: 3px;
+  transform: rotate(var(--trail-angle, 20deg)) scaleX(0);
+  transform-origin: left;
+  background: linear-gradient(90deg, #fff, var(--accent) 18%, transparent 86%);
+  clip-path: polygon(
+    0 20%,
+    20% 65%,
+    33% 13%,
+    49% 75%,
+    66% 22%,
+    81% 64%,
+    100% 36%,
+    100% 70%,
+    0 100%
+  );
+  box-shadow: 0 0 8px var(--accent);
+  opacity: 0;
+  animation:
+    oly-electric-trail-in 0.58s 0.2s ease-out both,
+    oly-electric-trail-return 0.58s 2.82s ease-in both;
+}
+
+.olympion-award.award-animation--great .target-arc--right {
+  display: none;
+}
+
+.olympion-award.award-animation--great .main-bolt--left,
+.olympion-award.award-animation--great .main-bolt--right,
+.olympion-award.award-animation--great .branch--one,
+.olympion-award.award-animation--great .branch--two,
+.olympion-award.award-animation--great .thunderbolt-silhouette {
+  display: none;
+}
+
+.olympion-award.award-animation--great .main-bolt--side,
+.olympion-award.award-animation--great .branch--three {
+  display: block;
+}
+
+.olympion-award.award-animation--great .main-bolt--side .lightning-edge {
+  animation-delay: 0.4s;
+  animation-duration: 0.32s;
+}
+
+.olympion-award.award-animation--great .main-bolt--side .lightning-core {
+  animation-delay: 0.4s;
+  animation-duration: 0.22s;
+}
+
+.olympion-award.award-animation--great .branch--three.lightning-edge {
+  animation-delay: 0.51s !important;
+}
+
+.olympion-award.award-animation--great .branch--three.lightning-core {
+  animation-delay: 0.51s !important;
+}
+
+.olympion-award.award-animation--great .ring-electricity circle {
+  stroke-dasharray: 299 597;
+}
+
+.olympion-award.award-animation--great .ring-electricity .lightning-edge {
+  animation-delay: 0.62s;
+  animation-duration: 0.5s;
+}
+
+.olympion-award.award-animation--great .ring-electricity .lightning-core {
+  animation-delay: 0.62s;
+  animation-duration: 0.38s;
+}
+
+.olympion-award.award-animation--great .impact-flare {
+  left: 307px;
+  animation-delay: 0.57s;
+}
+
+.olympion-award.award-animation--great .metal-reflection {
+  animation-delay: 0.59s;
+}
+
+.olympion-award.award-animation--great .laurel-reflection--left {
+  animation-delay: 0.7s;
+}
+
+.olympion-award.award-animation--great .laurel-reflection--right {
+  animation-delay: 0.88s;
+}
+
+.olympion-award.award-animation--great .symbol-electricity {
+  transform: rotate(90deg);
+  transform-origin: 215px 185px;
+}
+
+.olympion-award.award-animation--great .symbol-electricity .lightning-edge {
+  animation-delay: 1.3s;
+  animation-duration: 0.35s;
+}
+
+.olympion-award.award-animation--great .symbol-electricity .lightning-core {
+  animation-delay: 1.3s;
+  animation-duration: 0.24s;
+}
+
+.olympion-award.award-animation--great .electric-flight-trail {
+  animation:
+    oly-electric-trail-in 0.44s 0.14s ease-out both,
+    oly-electric-trail-return 0.48s 2.08s ease-in both;
+}
+
+.olympion-award.award-animation--great .laurel--right {
+  animation: oly-laurel-snap 0.34s 0.72s cubic-bezier(0.2, 1.7, 0.4, 1) both;
+}
+
+.olympion-award.award-animation--great .award-eyebrow {
+  animation-delay: 0.7s;
+}
+
+.olympion-award.award-animation--great .award-copy h2 {
+  animation-delay: 0.76s;
+}
+
+.olympion-award.award-animation--great .award-rule {
+  animation-delay: 0.92s;
+}
+
+.olympion-award.award-animation--great .award-copy p {
+  animation-delay: 1.02s;
+}
+
+@keyframes oly-dim-stage {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes oly-target-pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  16% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(2.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+
+@keyframes oly-medallion-flight-brilliant {
+  0%,
+  6% {
+    opacity: 0;
+    transform: translate(var(--flight-x, 180px), var(--flight-y, 60px)) scale(0.05) rotate(38deg);
+  }
+  8% {
+    opacity: 1;
+  }
+  20.3% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.12) rotate(-4deg);
+  }
+  26% {
+    transform: translate(0, 0) scale(0.97) rotate(1deg);
+  }
+  31%,
+  80% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(0);
+  }
+  88% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.98) rotate(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--flight-x, 180px), var(--flight-y, 60px)) scale(0.08)
+      rotate(var(--trail-angle, 20deg));
+  }
+}
+
+@keyframes oly-medallion-flight-great {
+  0%,
+  5% {
+    opacity: 0;
+    transform: translate(var(--flight-x, 180px), var(--flight-y, 60px)) scale(0.05) rotate(32deg);
+  }
+  8% {
+    opacity: 1;
+  }
+  21% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.1) rotate(-3deg);
+  }
+  28% {
+    transform: translate(0, 0) scale(0.98) rotate(1deg);
+  }
+  34%,
+  77% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--flight-x, 180px), var(--flight-y, 60px)) scale(0.08) rotate(18deg);
+  }
+}
+
+@keyframes oly-lightning-draw-edge {
+  0% {
+    stroke-dashoffset: 600;
+    opacity: 0;
+  }
+  16% {
+    opacity: 0.9;
+  }
+  64% {
+    stroke-dashoffset: 0;
+    opacity: 0.8;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes oly-lightning-draw-core {
+  0% {
+    stroke-dashoffset: 600;
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  70% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes oly-impact-flare {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  28% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.8);
+  }
+}
+
+@keyframes oly-metal-reflection {
+  0% {
+    opacity: 0;
+    transform: rotate(-45deg);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(190deg);
+  }
+}
+
+@keyframes oly-ring-electric-edge {
+  0% {
+    stroke-dashoffset: 597;
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.9;
+  }
+  78% {
+    stroke-dashoffset: 0;
+    opacity: 0.7;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes oly-ring-electric-core {
+  0% {
+    stroke-dashoffset: 597;
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  75% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes oly-laurel-light {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  42% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes oly-thunderbolt-reveal {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.86);
+    transform-origin: center;
+  }
+  34%,
+  68% {
+    opacity: 0.68;
+    transform: scale(1);
+  }
+}
+
+@keyframes oly-electric-trail-in {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--trail-angle, 20deg)) scaleX(0);
+  }
+  28% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--trail-angle, 20deg)) scaleX(1);
+  }
+}
+
+@keyframes oly-electric-trail-return {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--trail-angle, 20deg)) scaleX(0);
+    transform-origin: left;
+  }
+  32% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--trail-angle, 20deg)) scaleX(1);
+    transform-origin: left;
+  }
+}
+
+@keyframes oly-target-residue {
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes oly-laurel-snap {
+  0% {
+    transform: rotate(18deg) scaleX(-1) scale(0.82);
+  }
+  70% {
+    transform: rotate(8deg) scaleX(-1) scale(1.05);
+  }
+  100% {
+    transform: rotate(11deg) scaleX(-1) scale(1);
+  }
+}
+
+@keyframes oly-presentation-exit {
+  to {
+    opacity: 0;
+    filter: blur(3px);
+  }
+}
+
+@keyframes oly-medal-breathe {
+  to {
+    filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.6))
+      drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 35%, transparent));
+  }
+}
+
+@keyframes oly-shine-sweep {
+  from {
+    left: -90%;
+  }
+  to {
+    left: 130%;
+  }
+}
+
+@keyframes oly-laurel-reveal {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes oly-leaf-grow {
+  to {
+    transform: rotate(calc(-47deg + var(--leaf) * 4deg)) scale(1);
+  }
+}
+
+.olympion-award .laurel-leaf--outer {
+  animation-name: oly-leaf-grow-outer;
+}
+
+@keyframes oly-leaf-grow-outer {
+  to {
+    transform: rotate(calc(37deg - var(--leaf) * 2deg)) scaleY(-1) scale(1);
+  }
+}
+
+@keyframes oly-text-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes oly-title-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scaleY(1.18);
+    filter: blur(7px);
+    letter-spacing: 0.3em;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    filter: blur(0);
+    letter-spacing: 0.13em;
+  }
+}
+
+@keyframes oly-rule-grow {
+  to {
+    width: 145px;
+  }
+}
+
+@keyframes oly-ring-expand {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(70);
+  }
+}
+
+@keyframes oly-trail {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--trail-angle, 20deg)) scaleX(0);
+  }
+  25% {
+    opacity: 0.85;
+    transform: rotate(var(--trail-angle, 20deg)) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--trail-angle, 20deg)) scaleX(0);
+    transform-origin: left;
+  }
+}
+
+@keyframes oly-orbit-reveal {
+  0% {
+    opacity: 0;
+    transform: rotate(-35deg) scale(0.4);
+  }
+  35% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(145deg) scale(1.12);
+  }
+}
+
+@keyframes oly-spark-one {
+  to {
+    opacity: 0;
+    transform: translate(-120px, -95px) rotate(-58deg) scaleY(0.2);
+  }
+  30% {
+    opacity: 1;
+  }
+}
+@keyframes oly-spark-two {
+  to {
+    opacity: 0;
+    transform: translate(110px, -120px) rotate(42deg) scaleY(0.15);
+  }
+  30% {
+    opacity: 1;
+  }
+}
+@keyframes oly-spark-three {
+  to {
+    opacity: 0;
+    transform: translate(150px, 25px) rotate(88deg) scaleY(0.25);
+  }
+  30% {
+    opacity: 1;
+  }
+}
+@keyframes oly-spark-four {
+  to {
+    opacity: 0;
+    transform: translate(-145px, 40px) rotate(-96deg) scaleY(0.18);
+  }
+  30% {
+    opacity: 1;
+  }
+}
+@keyframes oly-spark-five {
+  to {
+    opacity: 0;
+    transform: translate(75px, 115px) rotate(150deg) scaleY(0.2);
+  }
+  30% {
+    opacity: 1;
+  }
+}
+@keyframes oly-spark-six {
+  to {
+    opacity: 0;
+    transform: translate(-80px, 120px) rotate(-145deg) scaleY(0.2);
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+.olympion-award.award-animation {
+  inset: 0;
+  z-index: 150;
+  overflow: hidden;
+  isolation: isolate;
+  font-family: Georgia, serif;
+}
+.olympion-award,
+.olympion-award * {
+  box-sizing: border-box;
+  pointer-events: none;
+}
+.olympion-award .award-lockup,
+.olympion-award .effects,
+.olympion-award .lightning-stage {
+  top: 50%;
+  transform: translate(-50%, -50%) scale(var(--award-scale, 1));
+}
+.olympion-award .target-pulse {
+  left: var(--target-x);
+  top: var(--target-y);
+}
+.olympion-award .target-electricity {
+  left: calc(var(--target-x) - 60px);
+  top: calc(var(--target-y) - 30px);
+}
+.olympion-award .award-copy h2 {
+  font-family: Georgia, serif;
+}
+.olympion-award .award-copy p {
+  color: #eeece6;
+}
+.olympion-award .stage-dim {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.olympion-award.award-still *,
+.olympion-award.award-still *::before,
+.olympion-award.award-still *::after {
+  animation: none !important;
+}
+.olympion-award.award-still .stage-dim {
+  opacity: 0.85;
+}
+.olympion-award.award-still .effects,
+.olympion-award.award-still .lightning-stage,
+.olympion-award.award-still .target-electricity,
+.olympion-award.award-still .target-pulse,
+.olympion-award.award-still .medallion-shine {
+  display: none;
+}
+.olympion-award.award-still .medallion-flight,
+.olympion-award.award-still .laurels,
+.olympion-award.award-still .award-eyebrow,
+.olympion-award.award-still .award-copy h2,
+.olympion-award.award-still .award-copy p {
+  opacity: 1;
+  filter: none;
+}
+.olympion-award.award-still .medallion-flight {
+  transform: none;
+}
+.olympion-award.award-still .laurels {
+  transform: scale(1);
+}
+.olympion-award.award-still .laurel-leaf {
+  transform: rotate(calc(-47deg + var(--leaf) * 4deg)) scale(1);
+}
+.olympion-award.award-still .laurel-leaf--outer {
+  transform: rotate(calc(37deg - var(--leaf) * 2deg)) scaleY(-1) scale(1);
+}
+.olympion-award.award-still .award-rule {
+  width: 145px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .olympion-award *,
+  .olympion-award *::before,
+  .olympion-award *::after {
+    animation: none !important;
+  }
+  .olympion-award .stage-dim {
+    opacity: 0.85;
+  }
+  .olympion-award .effects,
+  .olympion-award .lightning-stage,
+  .olympion-award .target-electricity,
+  .olympion-award .target-pulse,
+  .olympion-award .medallion-shine {
+    display: none;
+  }
+  .olympion-award .medallion-flight,
+  .olympion-award .laurels,
+  .olympion-award .award-eyebrow,
+  .olympion-award .award-copy h2,
+  .olympion-award .award-copy p {
+    opacity: 1;
+    filter: none;
+  }
+  .olympion-award .medallion-flight {
+    transform: none;
+  }
+  .olympion-award .laurels {
+    transform: scale(1);
+  }
+  .olympion-award .laurel-leaf {
+    transform: rotate(calc(-47deg + var(--leaf) * 4deg)) scale(1);
+  }
+  .olympion-award .laurel-leaf--outer {
+    transform: rotate(calc(37deg - var(--leaf) * 2deg)) scaleY(-1) scale(1);
+  }
+  .olympion-award .award-rule {
+    width: 145px;
+  }
+}
+
+.olympion-award .flight-trail,
+.olympion-award .electric-flight-trail {
+  top: 185px;
+  left: 215px;
+  width: var(--trail-width, 260px);
+  transform-origin: left center;
+}
