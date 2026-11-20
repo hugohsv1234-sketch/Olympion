@@ -1,3 +1,4 @@
+import { MOVE_GRADES } from './review';
 import { restore, playUci } from './chess';
 const isObject = (x: unknown): x is Record<string, unknown> =>
   Boolean(x) && typeof x === 'object' && !Array.isArray(x);
@@ -29,6 +30,9 @@ function score(x: unknown) {
 function quality(x: unknown) {
   if (!isObject(x)) return false;
   return (
+    (x.grade === undefined ||
+      (typeof x.grade === 'string' && Object.hasOwn(MOVE_GRADES, x.grade))) &&
+    (x.reviewVersion === undefined || number(x.reviewVersion, 1, 1000)) &&
     number(x.ply, 0, 500) &&
     number(x.quality, 0, 100) &&
     text(x.move, 5) &&

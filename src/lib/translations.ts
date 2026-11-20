@@ -1,4 +1,19 @@
 export const english: Record<string, string> = {
+  Brillant: 'Brilliant',
+  Großartig: 'Great',
+  Exzellent: 'Excellent',
+  Gut: 'Good',
+  Patzer: 'Blunder',
+  'Verpasste Möglichkeit': 'Missed opportunity',
+  Zugbewertungen: 'Move classifications',
+  'Zugbewertungen aktualisieren': 'Update move classifications',
+  'Ein Opfer. Eine Idee.': 'A sacrifice. A vision.',
+  'Der eine entscheidende Zug.': 'The one decisive move.',
+  'Du bietest Material an und erhältst mit diesem Figurenopfer eine mindestens ausgeglichene Stellung bei bestem Gegenspiel.':
+    'You offer material and maintain at least a balanced position against the best defence.',
+  'Nur dieser Zug hält die Stellung. Die zweitbeste Fortsetzung verliert deutlich an erwartetem Punktanteil.':
+    'Only this move holds the position. The second-best continuation loses a significant share of the expected result.',
+
   'Es gab nur einen legalen Zug.': 'There was only one legal move.',
   'Dein Zug entspricht dem besten Zug dieser Suche.':
     'Your move matches the best move found in this search.',

@@ -1,4 +1,5 @@
 'use client';
+import { MOVE_GRADES, moveGrade } from '@/lib/review';
 import { useT } from '@/lib/i18n';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { X, ArrowUpRight, LoaderCircle } from 'lucide-react';
@@ -156,7 +157,10 @@ export function QualityCard({ result }: { result: MoveQuality }) {
         <span>%</span>
       </div>
       <div>
-        <strong>{tr(result.label)}</strong>
+        <strong className={`review-quality-label grade-${moveGrade(result)}`}>
+          <span>{MOVE_GRADES[moveGrade(result)].symbol}</span>{' '}
+          {tr(MOVE_GRADES[moveGrade(result)].label)}
+        </strong>
         <p>
           {result.san}
           {tr(' \u00B7 Bestzug ')}

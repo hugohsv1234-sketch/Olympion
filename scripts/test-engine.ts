@@ -83,7 +83,16 @@ try {
   assert(best.quality >= 98);
   assert.equal(best.method, 'WDL');
   const blunder = await evaluateMove(positions[1], 'e6f7', 40000, undefined, engine);
-  assert.equal(blunder.label, 'Matt verpasst');
+  assert.equal(blunder.grade, 'missed');
+  const sacrifice = await evaluateMove(
+    { initialFen: '4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 0 16', moves: [] },
+    'b3b8',
+    120000,
+    undefined,
+    engine,
+  );
+  assert.equal(sacrifice.grade, 'brilliant');
+  assert.equal(sacrifice.played.mate, 2);
   // Abort after real search output, not a timer: a forced mate can finish before
   // a timer fires on a fast runner. Queue the next position before cancellation
   // settles to exercise the scheduler with the real engine process.

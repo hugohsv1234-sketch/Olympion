@@ -104,6 +104,8 @@ export interface SearchResult {
   budget: number;
 }
 export interface MoveQuality {
+  grade?: import('./review').MoveGrade;
+  reviewVersion?: number;
   ply: number;
   move: string;
   san: string;

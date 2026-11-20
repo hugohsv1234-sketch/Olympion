@@ -1,7 +1,8 @@
+import { classifyMove, offersSacrifice, MOVE_GRADES, REVIEW_VERSION } from './review';
 import type { EngineLine, EngineScore, MoveQuality, Position, SearchResult } from './types';
 import { restore, sanOf, notation, playUci } from './chess';
 import { BOTS, pickCandidate } from './bots';
-import { expectation, qualityMetric, qualityLabel } from './metrics';
+import { expectation, qualityMetric } from './metrics';
 export interface SearchOptions {
   nodes: number;
   skill?: number;
@@ -250,14 +251,14 @@ export async function evaluateMove(
   signal?: AbortSignal,
   engineInstance?: UciEngine,
 ): Promise<MoveQuality> {
-  const key = JSON.stringify(['19.0.1', position, budget, move]);
+  const key = JSON.stringify(['19.0.1', REVIEW_VERSION, position, budget, move]);
   const hit = cache.get(key);
   if (hit) return hit;
   const g = restore(position);
   const forced = g.moves().length === 1;
   const engine = engineInstance || getEngine();
   let nodes = budget;
-  let best = await engine.search(position, { nodes, skill: 20, multiPV: 1, signal });
+  let best = await engine.search(position, { nodes, skill: 20, multiPV: 2, signal });
   let played =
     best.bestMove === move
       ? best
@@ -270,7 +271,7 @@ export async function evaluateMove(
         });
   if (expectation(played.lines[0].score) - expectation(best.lines[0].score) > 0.04) {
     nodes *= 3;
-    best = await engine.search(position, { nodes, skill: 20, multiPV: 1, signal });
+    best = await engine.search(position, { nodes, skill: 20, multiPV: 2, signal });
     played =
       best.bestMove === move
         ? best
@@ -287,7 +288,24 @@ export async function evaluateMove(
   const quality = qualityMetric(b.score, p.score);
   const san = sanOf(position, move),
     bestSan = sanOf(position, best.bestMove);
-  const label = qualityLabel(b.score, p.score, quality, best.bestMove === move, forced);
+  const reliable =
+    b.depth >= 12 &&
+    p.depth >= 12 &&
+    !b.score.bound &&
+    !p.score.bound &&
+    Math.abs(b.depth - p.depth) <= 4 &&
+    expectation(p.score) <= expectation(b.score) + 0.015;
+  const second = best.lines.find((line) => line.move !== best.bestMove);
+  const grade = classifyMove({
+    best: b.score,
+    played: p.score,
+    second: second && second.depth >= b.depth - 2 && !second.score.bound ? second.score : undefined,
+    same: best.bestMove === move,
+    forced,
+    reliable,
+    sacrifice: reliable && quality >= 98 && offersSacrifice(position, move, p.pv),
+  });
+  const label = MOVE_GRADES[grade].label;
   const loss =
     b.score.cp !== undefined && p.score.cp !== undefined
       ? Math.max(0, b.score.cp - p.score.cp)
@@ -299,10 +317,20 @@ export async function evaluateMove(
     : best.bestMove === move
       ? 'Dein Zug entspricht dem besten Zug dieser Suche.'
       : `Die Engine bevorzugt ${bestSan}. Variante: ${notation(position, b.pv.slice(0, 6))}.`;
+  if (grade === 'brilliant')
+    explanation =
+      'Du bietest Material an und erhältst mit diesem Figurenopfer eine mindestens ausgeglichene Stellung bei bestem Gegenspiel.';
+  if (grade === 'great')
+    explanation =
+      'Nur dieser Zug hält die Stellung. Die zweitbeste Fortsetzung verliert deutlich an erwartetem Punktanteil.';
+  if (grade === 'missed')
+    explanation += ' Eine klare Gewinnchance oder ein erzwungenes Matt wurde verpasst.';
   if (m?.captured) explanation += ` ${san} schlägt eine Figur.`;
   if (p.score.mate !== undefined)
     explanation += ` Bei bestem Gegenspiel: ${p.score.mate > 0 ? 'Matt für dich' : 'Matt gegen dich'} in ${Math.abs(p.score.mate)}.`;
   const result: MoveQuality = {
+    grade,
+    reviewVersion: REVIEW_VERSION,
     ply: position.moves.length,
     move,
     san,

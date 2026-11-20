@@ -41,6 +41,8 @@ import { Empty, ErrorText, Heading, Loading, QualityCard } from './Common';
 import Chessboard from './Chessboard';
 import ChessComImport from './ChessComImport';
 import AnalysisLibrary from './AnalysisLibrary';
+import MoveCelebration from './MoveCelebration';
+import { MOVE_GRADES, moveGrade, REVIEW_VERSION } from '@/lib/review';
 import type { ChessComGame } from '@/lib/chesscom';
 interface Model extends Position {
   id: string;
@@ -70,6 +72,10 @@ export default function Analysis() {
     [note, setNote] = useState(''),
     [sourceOpen, setSourceOpen] = useState(true),
     [noteSaved, setNoteSaved] = useState(false);
+  const [celebration, setCelebration] = useState<{ result: MoveQuality; nonce: number } | null>(
+    null,
+  );
+  const celebrationNonce = useRef(0);
   const abort = useRef<AbortController | null>(null),
     root = useRef<HTMLDivElement>(null),
     initialized = useRef(false),
@@ -89,6 +95,7 @@ export default function Analysis() {
       setAutoplay(false);
       setSourceOpen(false);
       setNoteSaved(false);
+      setCelebration(null);
       setModel(m);
       setCursor(0);
       setVariation([]);
@@ -145,6 +152,7 @@ export default function Analysis() {
   const navigate = useCallback(
     (n: number) => {
       setAutoplay(false);
+      setCelebration(null);
       setCursor(Math.max(0, Math.min(model?.moves.length || 0, n)));
       setVariation([]);
       setPositionEval(null);
@@ -190,6 +198,7 @@ export default function Analysis() {
   const chess = useMemo(() => restore(position), [position]);
   const history = useMemo(() => (model ? restore(model).history({ verbose: true }) : []), [model]);
   const selected = cursor > 0 ? results.find((r) => r.ply === cursor - 1) : undefined;
+  const reviewOutdated = results.some((r) => r.reviewVersion !== REVIEW_VERSION);
   const currentResult = !variation.length ? results.find((r) => r.ply === cursor) : undefined;
   const importText = (text: string) => {
     try {
@@ -221,7 +230,11 @@ export default function Analysis() {
         ?.value as AnalysisRecord | undefined;
       const matches =
         saved?.initialFen === target.initialFen && saved.moves.join(' ') === target.moves.join(' ');
-      const output = [...(matches ? saved.results : [])];
+      const output = [
+        ...(matches && saved.results.every((r) => r.reviewVersion === REVIEW_VERSION)
+          ? saved.results
+          : []),
+      ];
       const startingColor = restore({ initialFen: target.initialFen, moves: [] }).turn();
       setResults(output);
       for (let ply = output.length; ply < target.moves.length; ply++) {
@@ -393,6 +406,7 @@ export default function Analysis() {
     abort.current?.abort();
     setBusy(false);
     setBudget(n);
+    setCelebration(null);
     setPositionEval(null);
     if (model) {
       const old = records.find((r) => r.id === `analysis:${model.id}:${n}`)?.value as
@@ -671,6 +685,13 @@ export default function Analysis() {
               </div>
             </div>
           )}
+          {!variation.length && (celebration?.result || selected) && (
+            <MoveCelebration
+              key={`${model.id}:${budget}:${cursor}:${celebration?.nonce ?? 0}:${(celebration?.result || selected)!.grade}`}
+              result={(celebration?.result || selected)!}
+              motion={settings.motion}
+            />
+          )}
           <div className="play-layout analysis-layout">
             <div className="board-column">
               <div className="evaluation-board">
@@ -688,17 +709,40 @@ export default function Analysis() {
                         : '–'}
                   </small>
                 </div>
-                <Chessboard
-                  fen={chess.fen()}
-                  orientation={orientation}
-                  onMove={(m) => {
-                    setAutoplay(false);
-                    setVariation((xs) => [...xs, m]);
-                    setPositionEval(null);
-                  }}
-                  lastMove={position.moves.at(-1)}
-                  arrow={bestArrow}
-                />
+                <div className="review-board-stage">
+                  <Chessboard
+                    fen={chess.fen()}
+                    orientation={orientation}
+                    onMove={(m) => {
+                      setAutoplay(false);
+                      setCelebration(null);
+                      setVariation((xs) => [...xs, m]);
+                      setPositionEval(null);
+                    }}
+                    lastMove={position.moves.at(-1)}
+                    arrow={bestArrow}
+                  />
+                  {selected &&
+                    !variation.length &&
+                    (() => {
+                      const grade = moveGrade(selected);
+                      const square = selected.move.slice(2, 4);
+                      const file = square.charCodeAt(0) - 97;
+                      const rank = Number(square[1]) - 1;
+                      return (
+                        <span
+                          className={`board-grade grade-${grade}`}
+                          title={tr(MOVE_GRADES[grade].label)}
+                          style={{
+                            left: `${((orientation === 'w' ? file : 7 - file) + 0.86) * 12.5}%`,
+                            top: `${((orientation === 'w' ? 7 - rank : rank) + 0.12) * 12.5}%`,
+                          }}
+                        >
+                          {MOVE_GRADES[grade].symbol}
+                        </span>
+                      );
+                    })()}
+                </div>
               </div>
               <div className="analysis-nav">
                 <button
@@ -726,6 +770,7 @@ export default function Analysis() {
                   aria-pressed={autoplay}
                   onClick={() => {
                     if (!autoplay && cursor >= model.moves.length) navigate(0);
+                    setCelebration(null);
                     setAutoplay((v) => !v);
                   }}
                 >
@@ -843,7 +888,10 @@ export default function Analysis() {
                 <button
                   className={'button ' + (busy ? 'secondary' : 'primary') + ' full'}
                   disabled={
-                    !busy && model.moves.length > 0 && results.length === model.moves.length
+                    !busy &&
+                    !reviewOutdated &&
+                    model.moves.length > 0 &&
+                    results.length === model.moves.length
                   }
                   onClick={() => {
                     if (busy) {
@@ -862,11 +910,13 @@ export default function Analysis() {
                       <Focus size={17} />
                       {!model.moves.length
                         ? tr('Stellung analysieren')
-                        : results.length === model.moves.length
-                          ? tr('Analyse abgeschlossen')
-                          : results.length
-                            ? tr('Analyse fortsetzen')
-                            : tr('Partie analysieren')}
+                        : reviewOutdated
+                          ? tr('Zugbewertungen aktualisieren')
+                          : results.length === model.moves.length
+                            ? tr('Analyse abgeschlossen')
+                            : results.length
+                              ? tr('Analyse fortsetzen')
+                              : tr('Partie analysieren')}
                     </>
                   )}
                 </button>
@@ -1002,6 +1052,31 @@ export default function Analysis() {
                     <Download size={17} />
                   </button>
                 </div>
+                {results.length > 0 && (
+                  <div className="review-grade-summary" aria-label={tr('Zugbewertungen')}>
+                    {(Object.keys(MOVE_GRADES) as (keyof typeof MOVE_GRADES)[]).map((grade) => {
+                      const count = results.filter((r) => moveGrade(r) === grade).length;
+                      if (!count) return null;
+                      return (
+                        <button
+                          key={grade}
+                          className={`review-grade-count grade-${grade}`}
+                          onClick={() => {
+                            const matching = results.filter((r) => moveGrade(r) === grade);
+                            navigate(
+                              (matching.find((r) => r.ply + 1 > cursor) || matching[0]).ply + 1,
+                            );
+                          }}
+                          title={tr(MOVE_GRADES[grade].label)}
+                        >
+                          <b>{MOVE_GRADES[grade].symbol}</b>
+                          <span>{tr(MOVE_GRADES[grade].label)}</span>
+                          <strong>{count}</strong>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <div className="move-list interactive">
                   {history.map((m, i) => {
                     const r = results.find((r) => r.ply === i);
@@ -1011,7 +1086,18 @@ export default function Analysis() {
                           'move ' + (cursor === i + 1 && !variation.length ? 'current' : '')
                         }
                         key={i}
-                        onClick={() => navigate(i + 1)}
+                        onMouseEnter={() => {
+                          if (r && ['brilliant', 'great'].includes(moveGrade(r)))
+                            setCelebration({ result: r, nonce: ++celebrationNonce.current });
+                        }}
+                        onFocus={() => {
+                          if (r && ['brilliant', 'great'].includes(moveGrade(r)))
+                            setCelebration({ result: r, nonce: ++celebrationNonce.current });
+                        }}
+                        onClick={() => {
+                          navigate(i + 1);
+                          if (r) setCelebration({ result: r, nonce: ++celebrationNonce.current });
+                        }}
                         aria-label={`${m.san}${r ? ', ' + r.label + ', ' + Math.round(r.quality) + ' Prozent' : ''}`}
                       >
                         <small>
@@ -1021,8 +1107,11 @@ export default function Analysis() {
                         </small>
                         {m.san}
                         {r && (
-                          <span className={'move-mark ' + (r.quality < 80 ? 'weak' : '')}>
-                            {r.quality < 80 ? '?' : r.quality >= 98 ? '·' : '○'}
+                          <span
+                            className={`move-mark grade-${moveGrade(r)}`}
+                            title={tr(MOVE_GRADES[moveGrade(r)].label)}
+                          >
+                            {MOVE_GRADES[moveGrade(r)].symbol}
                           </span>
                         )}
                       </button>
