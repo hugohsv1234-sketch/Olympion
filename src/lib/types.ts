@@ -175,7 +175,7 @@ export const DEFAULT_SETTINGS: Settings = {
   motion: true,
   coordinates: true,
   contrast: false,
-  theme: 'dark',
+  theme: 'light',
   language: 'de',
   premoves: true,
   liveAnalysis: true,

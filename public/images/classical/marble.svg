@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <filter id="stone"><feTurbulence type="fractalNoise" baseFrequency=".018 .034" numOctaves="3" seed="8"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".025"/></feComponentTransfer></filter>
+  <rect width="1200" height="800" fill="#f7f7f5"/>
+  <g fill="none" stroke="#888" stroke-width=".8" opacity=".1">
+    <path d="M-50 740 98 622 156 618 252 511 240 482 347 409 377 344 499 256 523 208 637 112 650 63 735-20M158 617 217 584 242 585M349 410 405 389 447 349M500 258 556 247 594 203M650 64 679 45"/>
+    <path d="m690 880 31-119 76-78 17-73 102-64 9-48 134-88 12-48 138-102M797 684 851 655 878 600M925 497 978 472 1014 426M1070 361 1134 324"/>
+    <path d="M-80 228 68 242 156 190 219 174 308 98 374 71 459-20M161 190 193 148 257 126M-70 553 22 516 65 456"/>
+  </g>
+  <rect width="1200" height="800" filter="url(#stone)" opacity=".35"/>
+</svg>

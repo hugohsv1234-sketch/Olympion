@@ -30,3 +30,10 @@ Die App stellt beim Seitenaufruf keine Verbindung zu Google Fonts her.
 ## Schachengine und Bibliotheken
 
 Siehe `THIRD_PARTY_NOTICES.md`. Stockfish-Quellarchiv und Lizenz werden zusammen mit der App angeboten. Lichess, Stockfish, Chess.com und FIDE betreiben oder bestätigen OLYMPION nicht.
+
+## Klassisches Redesign vom 20.11.2026
+
+- `public/images/classical/athena.webp` nutzt die tatsächliche Museumsfotografie **Marble head and torso of Athena**, The Metropolitan Museum of Art, Inventarnummer 24.97.15, römisch, 1.–2. Jahrhundert n. Chr. Originalfotografie DP357289, CC0 / Public Domain. Quelle und Open-Access-Angabe https://www.metmuseum.org/art/collection/search/251476 und https://collectionapi.metmuseum.org/public/collection/v1/objects/251476. Originaldatei https://images.metmuseum.org/CRDImages/gr/original/DP357289.jpg. Für die lokale Auslieferung proportional auf 750 × 1000 Pixel verkleinert und als WebP komprimiert. Die monochrome Darstellung und Bildausschnitte erfolgen im CSS.
+- `public/images/classical/acropolis.webp` basiert auf **Acropolis Parthenon Athens Greece.jpg**, fotografiert von Jebulon am 17.05.2015, CC0 1.0. Quelle und Lizenz https://commons.wikimedia.org/wiki/File:Acropolis_Parthenon_Athens_Greece.jpg. Für die lokale Auslieferung proportional auf 1600 × 686 Pixel verkleinert und als WebP komprimiert. Die monochrome Darstellung und Ausschnitte erfolgen im CSS.
+- `public/images/classical/marble.svg` ist eine eigene, zurückhaltende Vektortextur für die Marmoroberflächen.
+- Das mitgelieferte Referenzbild dient als gestalterische Vorlage. Es wird weder als Interface verwendet noch werden daraus Beispieldaten übernommen.

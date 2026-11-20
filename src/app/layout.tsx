@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import './classical.css';
 export const metadata: Metadata = {
   title: 'OLYMPION — Die Schachakademie',
   description:
@@ -16,7 +17,7 @@ export const viewport: Viewport = {
 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de" suppressHydrationWarning>
+    <html lang="de" data-theme="light" suppressHydrationWarning>
       <body>
         <script
           dangerouslySetInnerHTML={{

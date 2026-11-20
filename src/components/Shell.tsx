@@ -136,7 +136,7 @@ export default function Shell({
     };
   }, [section, put]);
   return (
-    <div className={'app ' + (!settings.motion ? 'no-motion' : '')}>
+    <div className={'app classical-app ' + (!settings.motion ? 'no-motion' : '')}>
       <a className="skip-link" href="#content">
         {tr('Zum Inhalt springen')}
       </a>
@@ -150,7 +150,7 @@ export default function Shell({
         </Link>
         <div className="sidebar-line" />
         <span className="nav-label">{tr('DEIN WEG ZUM OLYMP')}</span>
-        <nav aria-label={tr('Hauptnavigation')}>
+        <nav id="primary-navigation" aria-label={tr('Hauptnavigation')}>
           {nav.map((n) => (
             <Link
               key={n.id}
@@ -169,11 +169,6 @@ export default function Shell({
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <div className="quote">
-            <Columns3 size={21} />
-            <p>{tr('\u201EDer Anfang ist die H\u00E4lfte des Ganzen.\u201C')}</p>
-            <span>{tr('ARISTOTELES')}</span>
-          </div>
           <Link href="/profil" className={'profile-link ' + (section === 'profil' ? 'active' : '')}>
             <span className="avatar">
               {picture ? (
@@ -202,6 +197,8 @@ export default function Shell({
           <div className="topbar-left">
             <button
               className="icon-button mobile-menu"
+              aria-expanded={menu}
+              aria-controls="primary-navigation"
               onClick={() => setMenu(!menu)}
               aria-label={menu ? tr('Men\u00FC schlie\u00DFen') : tr('Men\u00FC \u00F6ffnen')}
             >
@@ -279,6 +276,12 @@ export default function Shell({
           {children}
         </main>
         <footer className="footer">
+          <div className="quote">
+            <Columns3 size={21} />
+            <p>{tr('\u201EDer Anfang ist die H\u00E4lfte des Ganzen.\u201C')}</p>
+            <span>{tr('ARISTOTELES')}</span>
+          </div>
+
           <span>
             <Logo />
             {tr('OLYMPION ')}

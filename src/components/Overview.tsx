@@ -164,10 +164,19 @@ export function Home() {
       </div>
       <section className="olymp-hero">
         <img
-          src="/images/athena.webp"
+          src="/images/classical/athena.webp"
           alt={tr('Athene aus Marmor vor einem antiken griechischen Tempel')}
-          width={1672}
-          height={941}
+          width={750}
+          height={1000}
+          className="academy-statue"
+          fetchPriority="high"
+        />
+        <img
+          className="academy-temple"
+          src="/images/classical/acropolis.webp"
+          alt=""
+          width={1600}
+          height={686}
           fetchPriority="high"
         />
         <div className="olymp-hero-shade" />
@@ -209,6 +218,207 @@ export function Home() {
           {tr('\u0391\u0398\u0397\u039D\u0391 \u00B7 STRATEGIE & WEISHEIT')}
         </div>
       </section>
+      <div className="home-academy-layout">
+        <div className="home-paths">
+          <div className="section-title mode-heading">
+            <div>
+              <span className="eyebrow">{tr('W\u00C4HLE DEINE HERAUSFORDERUNG')}</span>
+              <h2>{tr('Was ist dein n\u00E4chster Zug?')}</h2>
+            </div>
+            <span>{tr('Ein Olymp. Viele Wege nach oben.')}</span>
+          </div>
+          <div className="olymp-mode-grid">
+            {[
+              {
+                name: 'Athenes Prüfung',
+                label: 'TAKTIK & PUZZLES',
+                number: 'I',
+                text: 'Über 1.000 echte Stellungen. Trainiere deinen Blick für das Entscheidende.',
+                href: '/puzzles',
+                god: 19,
+                button: 'Taktik trainieren',
+                icon: Puzzle,
+              },
+              {
+                name: 'Die Arena der Götter',
+                label: '20 STOCKFISH-GEGNER',
+                number: 'II',
+                text: 'Von Hermes bis Zeus. Finde deinen Gegner und wachse an jedem Duell.',
+                href: '/arena',
+                god: 12,
+                button: 'Gegner auswählen',
+                icon: Swords,
+              },
+              {
+                name: 'Apollons Einsichten',
+                label: 'DEINE PERSÖNLICHE ANALYSE',
+                number: 'III',
+                text: 'Deine eigenen Partien werden zu deinem besten Lehrbuch. Verstehe jeden Zug.',
+                href: '/analyse',
+                god: 9,
+                button: 'Partien analysieren',
+                icon: Target,
+              },
+            ].map((mode) => (
+              <article className="olymp-mode-card" key={mode.name}>
+                <div className="mode-card-top">
+                  <mode.icon size={20} />
+                  <span>{mode.number}</span>
+                </div>
+                <div className="mode-statue">
+                  <img
+                    src={'/images/god-' + mode.god + '.webp'}
+                    alt=""
+                    width={250}
+                    height={300}
+                    loading="lazy"
+                  />
+                </div>
+                <div className="mode-card-content">
+                  <span className="eyebrow">{tr(mode.label)}</span>
+                  <h3>{tr(mode.name)}</h3>
+                  <p>{tr(mode.text)}</p>
+                  <Link href={mode.href}>
+                    {tr(mode.button)}
+                    <ArrowUpRight size={18} />
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+        <div className="home-learning">
+          <section className="chesscom-launch">
+            <div className="launch-symbol">
+              <Globe2 size={27} />
+            </div>
+            <div className="launch-copy">
+              <span className="eyebrow">{tr('NEU \u00B7 DEINE PARTIEN IM FOKUS')}</span>
+              <h2>{tr('Dein Chess.com-Name gen\u00FCgt.')}</h2>
+              <p>{tr('Entdecke deine Wendepunkte. Entwickle deinen eigenen Spielstil.')}</p>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                try {
+                  setError('');
+                  router.push('/analyse?chesscom=' + encodeURIComponent(normalizeUsername(name)));
+                } catch (e) {
+                  setError((e as Error).message);
+                }
+              }}
+            >
+              <label className="sr-only" htmlFor="home-chesscom">
+                {tr('Dein Chess.com-Name')}
+              </label>
+              <div className="launch-field">
+                <input
+                  id="home-chesscom"
+                  value={name}
+                  maxLength={50}
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  placeholder={tr('Dein Chess.com-Name')}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  aria-label={tr('Chess.com-Partien laden')}
+                  disabled={!name.trim()}
+                >
+                  <ArrowRight size={21} />
+                </button>
+              </div>
+              <small>{tr('Ohne Passwort. Echte Stockfish-Analyse.')}</small>
+              {error && (
+                <span className="inline-error" role="alert">
+                  {tr(error)}
+                </span>
+              )}
+            </form>
+          </section>
+          <div className="home-daily-grid">
+            <section className="mission-board">
+              <div className="section-title">
+                <div>
+                  <span className="eyebrow">{tr('KLEINE SCHRITTE. GROSSE WIRKUNG.')}</span>
+                  <h2>{tr('Deine Missionen f\u00FCr heute.')}</h2>
+                </div>
+                <span className="mission-count">{missions.filter((m) => m.done).length} / 3</span>
+              </div>
+              <div className="mission-list">
+                {missions.map((mission, i) => (
+                  <Link
+                    href={mission.href}
+                    className={'mission-row ' + (mission.done ? 'done' : '')}
+                    key={mission.title}
+                  >
+                    <span className="mission-icon">
+                      {mission.done ? <Check size={21} /> : <mission.icon size={21} />}
+                    </span>
+                    <div>
+                      <small>
+                        {tr('MISSION 0')}
+                        {i + 1}
+                      </small>
+                      <h3>{tr(mission.title)}</h3>
+                      <p>{tr(mission.text)}</p>
+                    </div>
+                    <span className="mission-state">
+                      {tr(mission.progress)}
+                      <ArrowUpRight size={17} />
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+            <section className="weekly-board">
+              <span className="eyebrow">{tr('DEIN RHYTHMUS')}</span>
+              <h2>{tr('Jeder Tag ein Schritt.')}</h2>
+              <div
+                className="goal-orbit"
+                style={{
+                  background: 'conic-gradient(var(--text) ' + progress + '%, var(--line) 0)',
+                }}
+                role="img"
+                aria-label={progress + ' Prozent deines Tagesziels erreicht'}
+              >
+                <div>
+                  <strong>
+                    {Math.floor(s.today / 60)}
+                    <small>{tr('MIN.')}</small>
+                  </strong>
+                  <span>
+                    {tr('von ')}
+                    {settings.goal}
+                    {tr(' heute')}
+                  </span>
+                </div>
+              </div>
+              <div className="week-days" aria-label={tr('Deine letzten sieben Trainingstage')}>
+                {days.map((day) => (
+                  <div
+                    className={'week-day ' + (day.active ? 'active' : '')}
+                    key={day.key}
+                    title={day.key + (day.active ? ' · trainiert' : ' · kein Training')}
+                  >
+                    <span>{tr(day.label)}</span>
+                    <strong>{day.active ? <Check size={15} /> : day.day}</strong>
+                  </div>
+                ))}
+              </div>
+              <p>
+                {days.filter((d) => d.active).length}
+                {tr(' aktive Tage in den letzten 7 Tagen.')}
+              </p>
+              <Link href="/training" className="text-button">
+                {tr('Deinen Trainingsplan \u00F6ffnen ')}
+                <ArrowRight size={15} />
+              </Link>
+            </section>
+          </div>
+        </div>
+      </div>
       <div className="home-stats-grid">
         {[
           {
@@ -244,199 +454,6 @@ export function Home() {
             <strong>{stat.value}</strong>
             <small>{tr(stat.note)}</small>
           </Link>
-        ))}
-      </div>
-      <section className="chesscom-launch">
-        <div className="launch-symbol">
-          <Globe2 size={27} />
-        </div>
-        <div className="launch-copy">
-          <span className="eyebrow">{tr('NEU \u00B7 DEINE PARTIEN IM FOKUS')}</span>
-          <h2>{tr('Dein Chess.com-Name gen\u00FCgt.')}</h2>
-          <p>{tr('Entdecke deine Wendepunkte. Entwickle deinen eigenen Spielstil.')}</p>
-        </div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            try {
-              setError('');
-              router.push('/analyse?chesscom=' + encodeURIComponent(normalizeUsername(name)));
-            } catch (e) {
-              setError((e as Error).message);
-            }
-          }}
-        >
-          <label className="sr-only" htmlFor="home-chesscom">
-            {tr('Dein Chess.com-Name')}
-          </label>
-          <div className="launch-field">
-            <input
-              id="home-chesscom"
-              value={name}
-              maxLength={50}
-              autoCapitalize="none"
-              spellCheck={false}
-              placeholder={tr('Dein Chess.com-Name')}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <button
-              type="submit"
-              aria-label={tr('Chess.com-Partien laden')}
-              disabled={!name.trim()}
-            >
-              <ArrowRight size={21} />
-            </button>
-          </div>
-          <small>{tr('Ohne Passwort. Echte Stockfish-Analyse.')}</small>
-          {error && (
-            <span className="inline-error" role="alert">
-              {tr(error)}
-            </span>
-          )}
-        </form>
-      </section>
-      <div className="home-daily-grid">
-        <section className="mission-board">
-          <div className="section-title">
-            <div>
-              <span className="eyebrow">{tr('KLEINE SCHRITTE. GROSSE WIRKUNG.')}</span>
-              <h2>{tr('Deine Missionen f\u00FCr heute.')}</h2>
-            </div>
-            <span className="mission-count">{missions.filter((m) => m.done).length} / 3</span>
-          </div>
-          <div className="mission-list">
-            {missions.map((mission, i) => (
-              <Link
-                href={mission.href}
-                className={'mission-row ' + (mission.done ? 'done' : '')}
-                key={mission.title}
-              >
-                <span className="mission-icon">
-                  {mission.done ? <Check size={21} /> : <mission.icon size={21} />}
-                </span>
-                <div>
-                  <small>
-                    {tr('MISSION 0')}
-                    {i + 1}
-                  </small>
-                  <h3>{tr(mission.title)}</h3>
-                  <p>{tr(mission.text)}</p>
-                </div>
-                <span className="mission-state">
-                  {tr(mission.progress)}
-                  <ArrowUpRight size={17} />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-        <section className="weekly-board">
-          <span className="eyebrow">{tr('DEIN RHYTHMUS')}</span>
-          <h2>{tr('Jeder Tag ein Schritt.')}</h2>
-          <div
-            className="goal-orbit"
-            style={{ background: 'conic-gradient(#e7e9e9 ' + progress + '%, #24292d 0)' }}
-            role="img"
-            aria-label={progress + ' Prozent deines Tagesziels erreicht'}
-          >
-            <div>
-              <strong>
-                {Math.floor(s.today / 60)}
-                <small>{tr('MIN.')}</small>
-              </strong>
-              <span>
-                {tr('von ')}
-                {settings.goal}
-                {tr(' heute')}
-              </span>
-            </div>
-          </div>
-          <div className="week-days" aria-label={tr('Deine letzten sieben Trainingstage')}>
-            {days.map((day) => (
-              <div
-                className={'week-day ' + (day.active ? 'active' : '')}
-                key={day.key}
-                title={day.key + (day.active ? ' · trainiert' : ' · kein Training')}
-              >
-                <span>{tr(day.label)}</span>
-                <strong>{day.active ? <Check size={15} /> : day.day}</strong>
-              </div>
-            ))}
-          </div>
-          <p>
-            {days.filter((d) => d.active).length}
-            {tr(' aktive Tage in den letzten 7 Tagen.')}
-          </p>
-          <Link href="/training" className="text-button">
-            {tr('Deinen Trainingsplan \u00F6ffnen ')}
-            <ArrowRight size={15} />
-          </Link>
-        </section>
-      </div>
-      <div className="section-title mode-heading">
-        <div>
-          <span className="eyebrow">{tr('W\u00C4HLE DEINE HERAUSFORDERUNG')}</span>
-          <h2>{tr('Was ist dein n\u00E4chster Zug?')}</h2>
-        </div>
-        <span>{tr('Ein Olymp. Viele Wege nach oben.')}</span>
-      </div>
-      <div className="olymp-mode-grid">
-        {[
-          {
-            name: 'Athenes Prüfung',
-            label: 'TAKTIK & PUZZLES',
-            number: 'I',
-            text: 'Über 1.000 echte Stellungen. Trainiere deinen Blick für das Entscheidende.',
-            href: '/puzzles',
-            god: 19,
-            button: 'Taktik trainieren',
-            icon: Puzzle,
-          },
-          {
-            name: 'Die Arena der Götter',
-            label: '20 STOCKFISH-GEGNER',
-            number: 'II',
-            text: 'Von Hermes bis Zeus. Finde deinen Gegner und wachse an jedem Duell.',
-            href: '/arena',
-            god: 12,
-            button: 'Gegner auswählen',
-            icon: Swords,
-          },
-          {
-            name: 'Apollons Einsichten',
-            label: 'DEINE PERSÖNLICHE ANALYSE',
-            number: 'III',
-            text: 'Deine eigenen Partien werden zu deinem besten Lehrbuch. Verstehe jeden Zug.',
-            href: '/analyse',
-            god: 9,
-            button: 'Partien analysieren',
-            icon: Target,
-          },
-        ].map((mode) => (
-          <article className="olymp-mode-card" key={mode.name}>
-            <div className="mode-card-top">
-              <mode.icon size={20} />
-              <span>{mode.number}</span>
-            </div>
-            <div className="mode-statue">
-              <img
-                src={'/images/god-' + mode.god + '.webp'}
-                alt=""
-                width={250}
-                height={300}
-                loading="lazy"
-              />
-            </div>
-            <div className="mode-card-content">
-              <span className="eyebrow">{tr(mode.label)}</span>
-              <h3>{tr(mode.name)}</h3>
-              <p>{tr(mode.text)}</p>
-              <Link href={mode.href}>
-                {tr(mode.button)}
-                <ArrowUpRight size={18} />
-              </Link>
-            </div>
-          </article>
         ))}
       </div>
       <section className="olymp-manifesto">
