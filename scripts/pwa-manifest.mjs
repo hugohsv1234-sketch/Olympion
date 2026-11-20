@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 const core = [
   '/',
   '/training',
+  '/eroeffnungen',
   '/puzzles',
   '/arena',
   '/analyse',

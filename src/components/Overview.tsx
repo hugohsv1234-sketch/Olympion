@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { normalizeUsername } from '@/lib/chesscom';
 import {
   ArrowRight,
+  BookOpen,
   ArrowUpRight,
   Check,
   Compass,
@@ -29,7 +30,11 @@ export function useStats() {
   const attempts = attemptsFrom(records),
     history = ratingHistory(attempts),
     games = records.filter((r) => r.kind === 'game').map((r) => r.value as GameRecord),
-    lessons = records.filter((r) => r.kind === 'lesson').map((r) => r.value as LessonResult);
+    lessons = records
+      .filter(
+        (r) => r.kind === 'lesson' && !(r.value as LessonResult).lessonId.startsWith('opening:'),
+      )
+      .map((r) => r.value as LessonResult);
   const sessions = records
     .filter((r) => r.kind === 'session')
     .map(
@@ -484,6 +489,19 @@ export function Training() {
         title={`Dein Training, ${settings.name}.`}
         description={tr('Kleine Schritte. Klare Aufgaben. Jeden Tag ein bisschen weiter.')}
       />
+      <Link className="opening-training-link" href="/eroeffnungen">
+        <BookOpen size={26} />
+        <div>
+          <h2>{tr('Eröffnungen auf dem Brett üben', 'Practise openings on the board')}</h2>
+          <p>
+            {tr(
+              '8 Eröffnungen, 16 Varianten. Spiele selbst und trainiere danach gegen einen Bot.',
+              '8 openings, 16 variations. Play the moves yourself, then practise against a bot.',
+            )}
+          </p>
+        </div>
+        <Swords size={24} />
+      </Link>
       <div className="training-intro">
         <div>
           <span className="eyebrow">{tr('DEIN TAGESZIEL')}</span>

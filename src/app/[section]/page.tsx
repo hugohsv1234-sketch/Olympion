@@ -1,7 +1,17 @@
 import { notFound } from 'next/navigation';
 import App from '@/components/App';
 import type { Section } from '@/lib/types';
-const sections = ['training', 'puzzles', 'arena', 'analyse', 'akademie', 'fortschritt', 'profil', 'rangliste'];
+const sections = [
+  'training',
+  'eroeffnungen',
+  'puzzles',
+  'arena',
+  'analyse',
+  'akademie',
+  'fortschritt',
+  'profil',
+  'rangliste',
+];
 export function generateStaticParams() {
   return sections.map((section) => ({ section }));
 }

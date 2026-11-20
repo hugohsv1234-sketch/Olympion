@@ -6,6 +6,7 @@ import { Home, Training, Progress } from './Overview';
 import dynamic from 'next/dynamic';
 import { Loading } from './Common';
 const Puzzles = dynamic(() => import('./Puzzles'), { loading: () => <Loading /> });
+const Openings = dynamic(() => import('./Openings'), { loading: () => <Loading /> });
 const Arena = dynamic(() => import('./Arena'), { loading: () => <Loading /> });
 const Analysis = dynamic(() => import('./Analysis'), { loading: () => <Loading /> });
 const Academy = dynamic(() => import('./Academy'), { loading: () => <Loading /> });
@@ -21,6 +22,8 @@ export default function App({ section }: { section: Section }) {
           <Training />
         ) : section === 'puzzles' ? (
           <Puzzles />
+        ) : section === 'eroeffnungen' ? (
+          <Openings />
         ) : section === 'arena' ? (
           <Arena />
         ) : section === 'analyse' ? (

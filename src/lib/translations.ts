@@ -1,4 +1,6 @@
 export const english: Record<string, string> = {
+  Eröffnungen: 'Openings',
+  'Zugfolgen & Bottraining': 'Move orders & bot practice',
   Brillant: 'Brilliant',
   Großartig: 'Great',
   Exzellent: 'Excellent',

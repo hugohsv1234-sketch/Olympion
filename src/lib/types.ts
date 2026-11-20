@@ -4,6 +4,7 @@ export type Section =
   | 'training'
   | 'puzzles'
   | 'arena'
+  | 'eroeffnungen'
   | 'analyse'
   | 'akademie'
   | 'fortschritt'

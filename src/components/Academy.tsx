@@ -27,7 +27,12 @@ export default function Academy() {
     answers = useRef<string[]>([]);
   const completed = new Set(
     records
-      .filter((r) => r.kind === 'lesson' && (r.value as LessonResult).completed)
+      .filter(
+        (r) =>
+          r.kind === 'lesson' &&
+          (r.value as LessonResult).completed &&
+          LESSONS.some((l) => l.id === (r.value as LessonResult).lessonId),
+      )
       .map((r) => (r.value as LessonResult).lessonId),
   );
   const start = async (l: Lesson) => {

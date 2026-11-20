@@ -1,0 +1,286 @@
+/* Opening practice shares the academy's marble, ink and silver palette. */
+.opening-layout {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.opening-library {
+  padding: 18px 12px;
+}
+.opening-library-title {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 6px 18px;
+}
+.classical-app .opening-library-title h2 {
+  font-size: 20px;
+  margin: 0 0 4px;
+}
+.opening-library-title p {
+  margin: 0;
+  font-size: 14px;
+}
+.opening-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 15px 12px;
+  text-align: left;
+  border: 1px solid transparent;
+  border-bottom-color: var(--line);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+}
+.opening-option:last-child {
+  border-bottom-color: transparent;
+}
+.opening-option small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+}
+.opening-option.active {
+  border-color: var(--text);
+  background: var(--panel-light);
+}
+.opening-option:hover {
+  background: var(--panel-light);
+}
+.opening-main {
+  min-width: 0;
+}
+.opening-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+.opening-settings label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 14px;
+  min-width: 0;
+}
+.opening-settings select {
+  width: 100%;
+  min-width: 0;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 12px 28px 12px 10px;
+  font-size: 15px;
+}
+.opening-mode {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.opening-mode .button {
+  white-space: normal;
+  min-height: 46px;
+}
+.opening-play {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.opening-board-column {
+  min-width: 0;
+}
+.opening-board-label {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.opening-board-label strong {
+  color: var(--text);
+}
+.opening-board-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.opening-board-actions .button {
+  flex: 1;
+  min-width: 120px;
+}
+.opening-coach {
+  padding: 24px;
+  min-width: 0;
+}
+.classical-app .opening-coach h2 {
+  margin: 12px 0;
+  font-size: 26px;
+}
+.classical-app .opening-coach h3 {
+  font-size: 18px;
+  margin: 24px 0 12px;
+}
+.opening-coach p {
+  font-size: 15px;
+}
+.opening-status {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--text);
+  background: var(--panel-light);
+  margin: 20px 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.opening-status span {
+  font-size: 14px;
+  color: var(--muted);
+}
+.opening-count {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+.opening-coach progress {
+  width: 100%;
+  height: 7px;
+  border: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 10px 0 0;
+  background: var(--line);
+  accent-color: var(--text);
+}
+.opening-coach progress::-webkit-progress-bar {
+  background: var(--line);
+}
+.opening-coach progress::-webkit-progress-value {
+  background: var(--text);
+}
+.opening-coach progress::-moz-progress-bar {
+  background: var(--text);
+}
+.classical-app .opening-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+.opening-hint {
+  padding: 12px;
+  background: var(--panel-light);
+  border: 1px solid var(--line);
+}
+.opening-history {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow: auto;
+  border-top: 1px solid var(--line);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.opening-history li {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr;
+  gap: 8px;
+  padding: 9px;
+  border-bottom: 1px solid var(--line);
+}
+.opening-history li span {
+  color: var(--muted);
+}
+.opening-training-link {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--text);
+  margin-bottom: 24px;
+  border-radius: 5px;
+  color: var(--text);
+}
+.classical-app .opening-training-link h2 {
+  margin: 0 0 8px;
+}
+.opening-training-link p {
+  margin: 0;
+}
+.opening-training-link > svg {
+  flex-shrink: 0;
+}
+@media (max-width: 1250px) {
+  .opening-play {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .opening-board-column {
+    max-width: 620px;
+    width: 100%;
+    margin: auto;
+  }
+}
+@media (max-width: 767px) {
+  .opening-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .opening-library {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .opening-library-title {
+    grid-column: 1/-1;
+    padding-bottom: 10px;
+  }
+  .opening-option {
+    padding: 12px 9px;
+    font-size: 14px;
+    border: 1px solid var(--line);
+    height: 100%;
+  }
+  .opening-option:last-child {
+    border-bottom-color: var(--line);
+  }
+  .opening-option svg {
+    display: none;
+  }
+  .opening-settings {
+    padding: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .opening-settings label:first-child {
+    grid-column: 1/-1;
+  }
+  .opening-mode .button {
+    width: 100%;
+  }
+  .opening-coach {
+    padding: 20px;
+  }
+  .opening-training-link {
+    padding: 18px;
+    gap: 14px;
+  }
+  .opening-training-link > svg:last-child {
+    display: none;
+  }
+}

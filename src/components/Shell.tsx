@@ -46,6 +46,13 @@ const nav = [
     icon: Puzzle,
     href: '/puzzles',
   },
+  {
+    id: 'eroeffnungen',
+    name: 'Eröffnungen',
+    sub: 'Zugfolgen & Bottraining',
+    icon: BookOpen,
+    href: '/eroeffnungen',
+  },
   { id: 'arena', name: 'Die Arena', sub: 'Spiele gegen die Götter', icon: Swords, href: '/arena' },
   {
     id: 'rangliste',
@@ -103,7 +110,7 @@ export default function Shell({
     };
   }, []);
   useEffect(() => {
-    if (!['puzzles', 'arena', 'analyse', 'akademie'].includes(section)) return;
+    if (!['puzzles', 'arena', 'analyse', 'akademie', 'eroeffnungen'].includes(section)) return;
     sessions.current = { id: uuid(), seconds: 0, last: Date.now() };
     let startDay = new Date().toDateString();
     const tick = () => {
